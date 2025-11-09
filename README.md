@@ -1,6 +1,6 @@
 # stingray
 
-A new Flutter project.
+A native Jellyfin music player made with Flutter.
 
 ## Getting Started
 
