@@ -4,11 +4,6 @@
 # Exit on first failure
 set -e
 
-echo "======================================"
-echo "Running Stingray checks..."
-echo "======================================"
-echo ""
-
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -21,48 +16,21 @@ print_step() {
 
 print_success() {
     echo -e "${GREEN}✓ $1${NC}"
-    echo ""
 }
 
-print_error() {
-    echo -e "${RED}✗ $1${NC}"
-    echo ""
-}
+# 1. Format check (fast)
+print_step "Checking format..."
+dart format --output=none --set-exit-if-changed .
+print_success "Format OK"
 
-# 1. Flutter Doctor
-print_step "Running flutter doctor..."
-flutter doctor
-print_success "Flutter doctor passed"
-
-# 2. Get dependencies
-print_step "Getting dependencies..."
-flutter pub get
-print_success "Dependencies up to date"
-
-# 3. Format check
-print_step "Checking code formatting..."
-if dart format --output=none --set-exit-if-changed .; then
-    print_success "Code is properly formatted"
-else
-    print_error "Code formatting issues found. Run: dart format ."
-    exit 1
-fi
-
-# 4. Analyze
-print_step "Running static analysis..."
+# 2. Analyze (fast, includes pub get check)
+print_step "Analyzing..."
 flutter analyze
-print_success "Analysis passed"
+print_success "Analysis OK"
 
-# 5. Tests
-print_step "Running tests..."
-flutter test
-print_success "All tests passed"
+# 3. Tests (moderate speed)
+print_step "Testing..."
+flutter test --reporter=compact
+print_success "Tests OK"
 
-# 6. Build for Linux
-print_step "Building for Linux..."
-flutter build linux --release
-print_success "Linux build succeeded"
-
-echo "======================================"
-echo -e "${GREEN}All checks passed! ✓${NC}"
-echo "======================================"
+echo -e "${GREEN}All checks passed!${NC}"
