@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'jellyfin_api.dart';
 import 'session_manager.dart';
 import 'app_shell.dart';
+import 'audio_player_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final String serverUrl;
@@ -51,6 +53,13 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (mounted) {
+        // Set API on audio player service
+        final audioPlayerService = Provider.of<AudioPlayerService>(
+          context,
+          listen: false,
+        );
+        audioPlayerService.setApi(api);
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => AppShell(api: api)),

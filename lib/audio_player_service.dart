@@ -28,6 +28,9 @@ class AudioPlayerService extends ChangeNotifier {
   String? _albumArtUrl;
   final List<QueueItem> _queue = [];
   int _currentQueueIndex = -1;
+  JellyfinApi? _api;
+  DateTime? _lastProgressReport;
+  bool _hasReportedStart = false;
 
   Track? get currentTrack => _currentTrack;
   Album? get currentAlbum => _currentAlbum;
@@ -39,6 +42,10 @@ class AudioPlayerService extends ChangeNotifier {
   int get queueIndex => _currentQueueIndex;
   bool get hasNext => _currentQueueIndex < _queue.length - 1;
   bool get hasPrevious => _currentQueueIndex > 0;
+
+  void setApi(JellyfinApi api) {
+    _api = api;
+  }
 
   double get progress {
     if (_duration.inMilliseconds == 0) return 0.0;
@@ -64,6 +71,34 @@ class AudioPlayerService extends ChangeNotifier {
     }
   }
 
+  int _durationToTicks(Duration duration) {
+    return duration.inMicroseconds * 10; // 1 tick = 100 nanoseconds
+  }
+
+  void _reportProgressIfNeeded() {
+    if (_api == null || _currentTrack == null) return;
+
+    final now = DateTime.now();
+    // Report progress every 10 seconds
+    if (_lastProgressReport == null ||
+        now.difference(_lastProgressReport!) > const Duration(seconds: 10)) {
+      _lastProgressReport = now;
+      final positionTicks = _durationToTicks(_position);
+      _api!
+          .reportPlaybackProgress(
+        _currentTrack!.id,
+        positionTicks,
+        !_isPlaying,
+      )
+          .catchError((e) {
+        // Silently fail - don't interrupt playback
+        if (kDebugMode) {
+          print('Failed to report playback progress: $e');
+        }
+      });
+    }
+  }
+
   AudioPlayerService() {
     _init();
 
@@ -76,6 +111,7 @@ class AudioPlayerService extends ChangeNotifier {
     _audioPlayer.onPositionChanged.listen((position) {
       _position = position;
       _updatePlaybackState();
+      _reportProgressIfNeeded();
       notifyListeners();
     });
 
@@ -136,10 +172,35 @@ class AudioPlayerService extends ChangeNotifier {
     String streamUrl,
     String? albumArtUrl,
   ) async {
+    // Report stop for previous track if any
+    if (_currentTrack != null && _api != null) {
+      final positionTicks = _durationToTicks(_position);
+      _api!.reportPlaybackStopped(_currentTrack!.id, positionTicks).catchError(
+        (e) {
+          if (kDebugMode) {
+            print('Failed to report playback stopped: $e');
+          }
+        },
+      );
+    }
+
     await _audioPlayer.play(UrlSource(streamUrl));
     _currentTrack = track;
     _currentAlbum = album;
     _albumArtUrl = albumArtUrl;
+    _hasReportedStart = false;
+    _lastProgressReport = null;
+
+    // Report playback start
+    if (_api != null) {
+      _api!.reportPlaybackStart(track.id, 0).catchError((e) {
+        if (kDebugMode) {
+          print('Failed to report playback start: $e');
+        }
+      });
+      _hasReportedStart = true;
+    }
+
     _updateMediaItem();
     _updatePlaybackState();
     notifyListeners();
@@ -219,9 +280,23 @@ class AudioPlayerService extends ChangeNotifier {
   }
 
   Future<void> stop() async {
+    // Report stop before clearing track
+    if (_currentTrack != null && _api != null) {
+      final positionTicks = _durationToTicks(_position);
+      _api!.reportPlaybackStopped(_currentTrack!.id, positionTicks).catchError(
+        (e) {
+          if (kDebugMode) {
+            print('Failed to report playback stopped: $e');
+          }
+        },
+      );
+    }
+
     await _audioPlayer.stop();
     _currentTrack = null;
     _currentAlbum = null;
+    _hasReportedStart = false;
+    _lastProgressReport = null;
     _updatePlaybackState();
     notifyListeners();
   }

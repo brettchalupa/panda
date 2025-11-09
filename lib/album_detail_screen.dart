@@ -254,6 +254,14 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 title: Text(track.name),
+                subtitle: track.playCount > 0
+                    ? Text(
+                        '${track.playCount} ${track.playCount == 1 ? 'play' : 'plays'}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      )
+                    : null,
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

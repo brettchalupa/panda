@@ -193,6 +193,95 @@ class JellyfinApi {
       throw Exception('Failed to get favorite tracks: ${response.statusCode}');
     }
   }
+
+  // Playback reporting
+  Future<void> reportPlaybackStart(
+    String itemId,
+    int positionTicks,
+  ) async {
+    if (accessToken == null || userId == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await http.post(
+      Uri.parse('$serverUrl/Sessions/Playing'),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Emby-Token': accessToken!,
+        ..._getAuthHeaders(),
+      },
+      body: jsonEncode({
+        'ItemId': itemId,
+        'PositionTicks': positionTicks,
+        'IsPaused': false,
+        'PlayMethod': 'DirectStream',
+      }),
+    );
+
+    if (response.statusCode != 204 && response.statusCode != 200) {
+      throw Exception('Failed to report playback start: ${response.statusCode}');
+    }
+  }
+
+  Future<void> reportPlaybackProgress(
+    String itemId,
+    int positionTicks,
+    bool isPaused,
+  ) async {
+    if (accessToken == null || userId == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await http.post(
+      Uri.parse('$serverUrl/Sessions/Playing/Progress'),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Emby-Token': accessToken!,
+        ..._getAuthHeaders(),
+      },
+      body: jsonEncode({
+        'ItemId': itemId,
+        'PositionTicks': positionTicks,
+        'IsPaused': isPaused,
+        'PlayMethod': 'DirectStream',
+      }),
+    );
+
+    if (response.statusCode != 204 && response.statusCode != 200) {
+      throw Exception(
+        'Failed to report playback progress: ${response.statusCode}',
+      );
+    }
+  }
+
+  Future<void> reportPlaybackStopped(
+    String itemId,
+    int positionTicks,
+  ) async {
+    if (accessToken == null || userId == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await http.post(
+      Uri.parse('$serverUrl/Sessions/Playing/Stopped'),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Emby-Token': accessToken!,
+        ..._getAuthHeaders(),
+      },
+      body: jsonEncode({
+        'ItemId': itemId,
+        'PositionTicks': positionTicks,
+        'PlayMethod': 'DirectStream',
+      }),
+    );
+
+    if (response.statusCode != 204 && response.statusCode != 200) {
+      throw Exception(
+        'Failed to report playback stopped: ${response.statusCode}',
+      );
+    }
+  }
 }
 
 class AuthenticationResult {
@@ -261,6 +350,7 @@ class Track {
   final String? albumId;
   final String? albumArtist;
   final List<String>? artists;
+  final int playCount;
 
   Track({
     required this.id,
@@ -272,6 +362,7 @@ class Track {
     this.albumId,
     this.albumArtist,
     this.artists,
+    this.playCount = 0,
   });
 
   factory Track.fromJson(Map<String, dynamic> json) {
@@ -287,6 +378,7 @@ class Track {
       artists: (json['Artists'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      playCount: json['UserData']?['PlayCount'] as int? ?? 0,
     );
   }
 
@@ -300,6 +392,7 @@ class Track {
     String? albumId,
     String? albumArtist,
     List<String>? artists,
+    int? playCount,
   }) {
     return Track(
       id: id ?? this.id,
@@ -311,6 +404,7 @@ class Track {
       albumId: albumId ?? this.albumId,
       albumArtist: albumArtist ?? this.albumArtist,
       artists: artists ?? this.artists,
+      playCount: playCount ?? this.playCount,
     );
   }
 

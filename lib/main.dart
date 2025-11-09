@@ -17,23 +17,32 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AudioPlayerService(),
+    final audioPlayerService = AudioPlayerService();
+    return ChangeNotifierProvider.value(
+      value: audioPlayerService,
       child: MaterialApp(
         title: 'Stingray',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
-        home: const MyHomePage(title: 'Stingray'),
+        home: MyHomePage(
+          title: 'Stingray',
+          audioPlayerService: audioPlayerService,
+        ),
       ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({
+    super.key,
+    required this.title,
+    required this.audioPlayerService,
+  });
 
   final String title;
+  final AudioPlayerService audioPlayerService;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -78,6 +87,9 @@ class _MyHomePageState extends State<MyHomePage> {
           api.accessToken = accessToken;
           api.userId = userId;
           api.userName = userName;
+
+          // Set API on audio player service
+          widget.audioPlayerService.setApi(api);
 
           Navigator.pushReplacement(
             context,

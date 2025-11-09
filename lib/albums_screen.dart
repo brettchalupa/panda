@@ -43,21 +43,6 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
         _albums = albums;
         _isLoading = false;
       });
-
-      // Precache album art for smooth scrolling
-      if (mounted) {
-        for (final album in albums) {
-          // Request 400px images for grid (2x the display size for retina)
-          final albumArtUrl = widget.api.getAlbumArtUrl(
-            album.id,
-            maxWidth: 400,
-            maxHeight: 400,
-          );
-          if (albumArtUrl != null) {
-            precacheImage(CachedNetworkImageProvider(albumArtUrl), context);
-          }
-        }
-      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
