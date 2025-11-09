@@ -9,7 +9,9 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('Health check UI smoke test', (WidgetTester tester) async {
+  testWidgets('Main screen shows sign in when server configured', (
+    WidgetTester tester,
+  ) async {
     SharedPreferences.setMockInitialValues({
       'server_url': 'http://test-server:8096',
     });
@@ -23,12 +25,11 @@ void main() {
     // Verify server URL is displayed.
     expect(find.text('http://test-server:8096'), findsOneWidget);
 
-    // Verify status text is present.
-    expect(find.text('Jellyfin Server Status:'), findsOneWidget);
-    expect(find.text('Ready to check'), findsOneWidget);
+    // Verify main title is present.
+    expect(find.text('Jellyfin Music Player'), findsOneWidget);
 
-    // Verify the button is present.
-    expect(find.text('Check Health'), findsOneWidget);
+    // Verify the sign in button is present.
+    expect(find.text('Sign In'), findsOneWidget);
 
     // Verify settings button is present.
     expect(find.byIcon(Icons.settings), findsOneWidget);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'settings_screen.dart';
+import 'login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,7 +34,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String _status = 'Not checked';
   String _serverUrl = '';
-  bool _isLoading = false;
   bool _hasServer = false;
 
   @override
@@ -51,7 +50,6 @@ class _MyHomePageState extends State<MyHomePage> {
       if (serverUrl != null && serverUrl.isNotEmpty) {
         _serverUrl = serverUrl;
         _hasServer = true;
-        _status = 'Ready to check';
       } else {
         _hasServer = false;
         _status = 'No server configured';
@@ -77,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> _checkHealth() async {
+  void _login() {
     if (!_hasServer) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please configure server first')),
@@ -85,27 +83,12 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-      _status = 'Checking...';
-    });
-
-    try {
-      final response = await http.get(Uri.parse('$_serverUrl/health'));
-      setState(() {
-        _isLoading = false;
-        if (response.statusCode == 200) {
-          _status = 'Server is healthy! (${response.statusCode})';
-        } else {
-          _status = 'Server returned: ${response.statusCode}';
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _status = 'Error: $e';
-      });
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(serverUrl: _serverUrl),
+      ),
+    );
   }
 
   @override
@@ -127,28 +110,19 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'Jellyfin Server Status:',
-              style: TextStyle(fontSize: 20),
+              'Jellyfin Music Player',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             if (_hasServer)
               Text(_serverUrl, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 20),
-            Text(
-              _status,
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
+            if (!_hasServer)
+              Text(_status, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _checkHealth,
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Check Health'),
+            ElevatedButton.icon(
+              onPressed: _hasServer ? _login : _openSettings,
+              icon: Icon(_hasServer ? Icons.login : Icons.settings),
+              label: Text(_hasServer ? 'Sign In' : 'Configure Server'),
             ),
           ],
         ),

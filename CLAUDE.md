@@ -7,6 +7,24 @@ Stingray is a native music player for Jellyfin, inspired by Plexamp. The goal is
 **Current Focus**: Linux desktop development
 **Primary Target Platform**: Linux (will expand to other platforms later)
 
+## System Requirements (Linux)
+
+Before building, install these system dependencies:
+
+**Fedora/RHEL**:
+```bash
+sudo dnf install gstreamer1-devel gstreamer1-plugins-base-devel gstreamer1-plugins-good gstreamer1-plugins-bad-free libsecret-devel
+```
+
+**Ubuntu/Debian**:
+```bash
+sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libsecret-1-dev
+```
+
+**What they're for**:
+- GStreamer: Required for `audioplayers` package (audio playback)
+- libsecret: Required for `flutter_secure_storage` package (encrypted token storage)
+
 ## Development Philosophy
 
 **Work in small chunks!** This is critical. Break down features into the smallest possible increments that can be tested and verified independently.
@@ -33,6 +51,8 @@ stingray/
 
 - `http: ^1.2.0` - For API requests to Jellyfin server
 - `shared_preferences: ^2.2.2` - For storing user configuration (server URL, etc.)
+- `flutter_secure_storage: ^9.0.0` - For securely storing authentication tokens
+- `audioplayers: ^6.0.0` - For audio playback (requires GStreamer on Linux)
 - `cupertino_icons: ^1.0.8` - Icon fonts
 
 ### Development Tools
@@ -77,11 +97,18 @@ Currently using basic Flutter `StatefulWidget` patterns. As the app grows, we ma
 
 ### Storage
 
-Using `shared_preferences` for user configuration:
-
+**Configuration (shared_preferences)**:
 - `server_url`: Jellyfin server URL (e.g., "http://lab:8096")
+- Stored in user space (~/.local/share on Linux)
 
-Data is stored in user space (~/.local/share on Linux).
+**Authentication (flutter_secure_storage)**:
+- `access_token`: Jellyfin API access token (encrypted)
+- `user_id`: Current user's ID (encrypted)
+- `user_name`: Current user's name (encrypted)
+- Stored securely using platform-specific keychain/keystore
+- Use `SessionManager` helper class for all auth operations
+
+**Important**: Never use `shared_preferences` for tokens! Always use `SessionManager` for auth data.
 
 ## Testing Strategy
 
@@ -190,15 +217,22 @@ Things to build (in small chunks!):
 - ✅ Basic Flutter app structure
 - ✅ Server configuration with persistence
 - ✅ Settings screen with validation
-- ✅ Health check endpoint test
-- ✅ Comprehensive test coverage
+- ✅ Secure authentication with encrypted token storage
+- ✅ Music library selection
+- ✅ Album browsing and listing
+- ✅ Track listing with duration display
+- ✅ Audio playback with play/pause controls
+- ✅ Sign out functionality
+- ✅ Comprehensive test coverage (11 tests)
 - ✅ Fast development workflow (`ok` script)
 
 **Next steps**:
 
-- Authentication flow
-- Music library browsing
-- Basic playback
+- Persistent player controls
+- Native media key support
+- Queue management / playlist
+- Album art display
+- Search functionality
 
 ## Notes
 
