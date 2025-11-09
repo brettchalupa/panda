@@ -1,9 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'audio_player_service.dart';
+import 'jellyfin_api.dart';
 
-class NowPlayingScreen extends StatelessWidget {
-  const NowPlayingScreen({super.key});
+class NowPlayingScreen extends StatefulWidget {
+  final JellyfinApi api;
+
+  const NowPlayingScreen({super.key, required this.api});
+
+  @override
+  State<NowPlayingScreen> createState() => _NowPlayingScreenState();
+}
+
+class _NowPlayingScreenState extends State<NowPlayingScreen> {
+  Future<void> _toggleFavorite(
+    Track track,
+    AudioPlayerService playerService,
+  ) async {
+    try {
+      if (track.isFavorite) {
+        await widget.api.unmarkFavorite(track.id);
+        playerService.updateTrackFavoriteStatus(track.id, false);
+      } else {
+        await widget.api.markFavorite(track.id);
+        playerService.updateTrackFavoriteStatus(track.id, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update favorite: $e')),
+        );
+      }
+    }
+  }
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -78,12 +108,14 @@ class NowPlayingScreen extends StatelessWidget {
             if (playerService.albumArtUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  playerService.albumArtUrl!,
+                child: CachedNetworkImage(
+                  imageUrl: playerService.albumArtUrl!,
                   width: 300,
                   height: 300,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
+                  placeholder: (context, url) =>
+                      const Icon(Icons.album, size: 300),
+                  errorWidget: (context, url, error) =>
                       const Icon(Icons.album, size: 300),
                 ),
               )
@@ -169,6 +201,21 @@ class NowPlayingScreen extends StatelessWidget {
                       : null,
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            // Favorite button
+            IconButton(
+              icon: Icon(
+                playerService.currentTrack!.isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: playerService.currentTrack!.isFavorite
+                    ? Colors.red
+                    : null,
+              ),
+              iconSize: 32,
+              onPressed: () =>
+                  _toggleFavorite(playerService.currentTrack!, playerService),
             ),
           ],
         ),

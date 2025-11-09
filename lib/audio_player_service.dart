@@ -45,6 +45,25 @@ class AudioPlayerService extends ChangeNotifier {
     return _position.inMilliseconds / _duration.inMilliseconds;
   }
 
+  /// Update the current track's favorite status
+  void updateTrackFavoriteStatus(String trackId, bool isFavorite) {
+    if (_currentTrack?.id == trackId) {
+      _currentTrack = _currentTrack!.copyWith(isFavorite: isFavorite);
+      notifyListeners();
+    }
+    // Also update in queue
+    for (var i = 0; i < _queue.length; i++) {
+      if (_queue[i].track.id == trackId) {
+        _queue[i] = QueueItem(
+          track: _queue[i].track.copyWith(isFavorite: isFavorite),
+          album: _queue[i].album,
+          streamUrl: _queue[i].streamUrl,
+          albumArtUrl: _queue[i].albumArtUrl,
+        );
+      }
+    }
+  }
+
   AudioPlayerService() {
     _init();
 

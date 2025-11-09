@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'jellyfin_api.dart';
 import 'session_manager.dart';
 import 'album_detail_screen.dart';
 import 'audio_player_service.dart';
+import 'favorites_screen.dart';
 
 class AlbumsScreen extends StatefulWidget {
   final JellyfinApi api;
@@ -39,6 +41,21 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
         _albums = albums;
         _isLoading = false;
       });
+
+      // Precache album art for smooth scrolling
+      if (mounted) {
+        for (final album in albums) {
+          // Request 400px images for grid (2x the display size for retina)
+          final albumArtUrl = widget.api.getAlbumArtUrl(
+            album.id,
+            maxWidth: 400,
+            maxHeight: 400,
+          );
+          if (albumArtUrl != null) {
+            precacheImage(CachedNetworkImageProvider(albumArtUrl), context);
+          }
+        }
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -82,6 +99,18 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
         title: Text(widget.libraryName),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FavoritesScreen(api: widget.api),
+                ),
+              );
+            },
+            tooltip: 'Favorites',
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: _signOut,
@@ -159,7 +188,11 @@ class _AlbumCard extends StatelessWidget {
       final tracks = await api.getTracks(album.id);
       if (tracks.isEmpty) return;
 
-      final albumArtUrl = api.getAlbumArtUrl(album.id);
+      final albumArtUrl = api.getAlbumArtUrl(
+        album.id,
+        maxWidth: 600,
+        maxHeight: 600,
+      );
       final queue = tracks.map((t) {
         return QueueItem(
           track: t,
@@ -200,7 +233,11 @@ class _AlbumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final albumArtUrl = api.getAlbumArtUrl(album.id);
+    final albumArtUrl = api.getAlbumArtUrl(
+      album.id,
+      maxWidth: 400,
+      maxHeight: 400,
+    );
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -214,10 +251,12 @@ class _AlbumCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   if (albumArtUrl != null)
-                    Image.network(
-                      albumArtUrl,
+                    CachedNetworkImage(
+                      imageUrl: albumArtUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
+                      placeholder: (context, url) =>
+                          const Icon(Icons.album, size: 64),
+                      errorWidget: (context, url, error) =>
                           const Icon(Icons.album, size: 64),
                     )
                   else

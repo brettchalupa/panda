@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'jellyfin_api.dart';
 import 'audio_player_service.dart';
 
@@ -31,6 +32,18 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         _tracks = tracks;
         _isLoading = false;
       });
+
+      // Precache album art
+      if (mounted) {
+        final albumArtUrl = widget.api.getAlbumArtUrl(
+          widget.album.id,
+          maxWidth: 500,
+          maxHeight: 500,
+        );
+        if (albumArtUrl != null) {
+          precacheImage(CachedNetworkImageProvider(albumArtUrl), context);
+        }
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -42,7 +55,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   void _playTrack(Track track, AudioPlayerService playerService) {
     if (_tracks == null) return;
 
-    final albumArtUrl = widget.api.getAlbumArtUrl(widget.album.id);
+    final albumArtUrl = widget.api.getAlbumArtUrl(
+      widget.album.id,
+      maxWidth: 500,
+      maxHeight: 500,
+    );
     final trackIndex = _tracks!.indexOf(track);
 
     // Build queue from all tracks
@@ -67,10 +84,40 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     );
   }
 
+  Future<void> _toggleFavorite(Track track) async {
+    try {
+      final newFavoriteStatus = !track.isFavorite;
+      if (track.isFavorite) {
+        await widget.api.unmarkFavorite(track.id);
+      } else {
+        await widget.api.markFavorite(track.id);
+      }
+      // Update the track's favorite status in the local list
+      setState(() {
+        final index = _tracks!.indexWhere((t) => t.id == track.id);
+        if (index != -1) {
+          _tracks![index] = _tracks![index].copyWith(
+            isFavorite: newFavoriteStatus,
+          );
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update favorite: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final playerService = Provider.of<AudioPlayerService>(context);
-    final albumArtUrl = widget.api.getAlbumArtUrl(widget.album.id);
+    final albumArtUrl = widget.api.getAlbumArtUrl(
+      widget.album.id,
+      maxWidth: 500,
+      maxHeight: 500,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -120,12 +167,14 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
             if (albumArtUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  albumArtUrl,
+                child: CachedNetworkImage(
+                  imageUrl: albumArtUrl,
                   width: 250,
                   height: 250,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
+                  placeholder: (context, url) =>
+                      const Icon(Icons.album, size: 250),
+                  errorWidget: (context, url, error) =>
                       const Icon(Icons.album, size: 250),
                 ),
               )
@@ -216,6 +265,16 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     const SizedBox(width: 8),
                     if (isCurrentTrack && playerService.isPlaying)
                       const Icon(Icons.volume_up, size: 20),
+                    IconButton(
+                      icon: Icon(
+                        track.isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: track.isFavorite ? Colors.red : null,
+                      ),
+                      iconSize: 20,
+                      onPressed: () => _toggleFavorite(track),
+                    ),
                   ],
                 ),
                 selected: isCurrentTrack,

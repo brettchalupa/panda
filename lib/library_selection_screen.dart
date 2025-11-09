@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'jellyfin_api.dart';
 import 'albums_screen.dart';
 
@@ -29,6 +30,24 @@ class _LibrarySelectionScreenState extends State<LibrarySelectionScreen> {
         _folders = folders.where((f) => f.isMusic).toList();
         _isLoading = false;
       });
+
+      // Auto-navigate to last selected library
+      final prefs = await SharedPreferences.getInstance();
+      final lastLibraryId = prefs.getString('last_library_id');
+      if (lastLibraryId != null && mounted) {
+        final lastLibrary = _folders?.firstWhere(
+          (f) => f.id == lastLibraryId,
+          orElse: () => _folders!.first,
+        );
+        if (lastLibrary != null) {
+          // Navigate after a short delay to let the UI settle
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted) {
+              _selectLibrary(lastLibrary);
+            }
+          });
+        }
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -37,17 +56,23 @@ class _LibrarySelectionScreenState extends State<LibrarySelectionScreen> {
     }
   }
 
-  void _selectLibrary(MediaFolder folder) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AlbumsScreen(
-          api: widget.api,
-          libraryId: folder.id,
-          libraryName: folder.name,
+  Future<void> _selectLibrary(MediaFolder folder) async {
+    // Save the selected library
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_library_id', folder.id);
+
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AlbumsScreen(
+            api: widget.api,
+            libraryId: folder.id,
+            libraryName: folder.name,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   @override

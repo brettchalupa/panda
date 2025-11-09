@@ -120,9 +120,76 @@ class JellyfinApi {
     return '$serverUrl/Audio/$itemId/stream?static=true&api_key=$accessToken';
   }
 
-  String? getAlbumArtUrl(String itemId) {
+  String? getAlbumArtUrl(String itemId, {int? maxWidth, int? maxHeight}) {
     if (accessToken == null) return null;
-    return '$serverUrl/Items/$itemId/Images/Primary?api_key=$accessToken';
+    final params = <String, String>{
+      'api_key': accessToken!,
+      if (maxWidth != null) 'maxWidth': maxWidth.toString(),
+      if (maxHeight != null) 'maxHeight': maxHeight.toString(),
+      'quality': '90',
+    };
+    final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+    return '$serverUrl/Items/$itemId/Images/Primary?$query';
+  }
+
+  Future<void> markFavorite(String itemId) async {
+    if (accessToken == null || userId == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await http.post(
+      Uri.parse('$serverUrl/UserFavoriteItems/$itemId'),
+      headers: {'X-Emby-Token': accessToken!, ..._getAuthHeaders()},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to mark as favorite: ${response.statusCode}');
+    }
+  }
+
+  Future<void> unmarkFavorite(String itemId) async {
+    if (accessToken == null || userId == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await http.delete(
+      Uri.parse('$serverUrl/UserFavoriteItems/$itemId'),
+      headers: {'X-Emby-Token': accessToken!, ..._getAuthHeaders()},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to unmark as favorite: ${response.statusCode}');
+    }
+  }
+
+  Future<List<Track>> getFavoriteTracks() async {
+    if (accessToken == null || userId == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final uri = Uri.parse('$serverUrl/Items').replace(
+      queryParameters: {
+        'userId': userId,
+        'includeItemTypes': 'Audio',
+        'filters': 'IsFavorite',
+        'sortBy': 'SortName',
+        'sortOrder': 'Ascending',
+        'recursive': 'true',
+      },
+    );
+
+    final response = await http.get(
+      uri,
+      headers: {'X-Emby-Token': accessToken!, ..._getAuthHeaders()},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final items = data['Items'] as List;
+      return items.map((item) => Track.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to get favorite tracks: ${response.statusCode}');
+    }
   }
 }
 
@@ -187,8 +254,15 @@ class Track {
   final String name;
   final int? trackNumber;
   final int? runtime; // in ticks (10000 ticks = 1ms)
+  final bool isFavorite;
 
-  Track({required this.id, required this.name, this.trackNumber, this.runtime});
+  Track({
+    required this.id,
+    required this.name,
+    this.trackNumber,
+    this.runtime,
+    this.isFavorite = false,
+  });
 
   factory Track.fromJson(Map<String, dynamic> json) {
     return Track(
@@ -196,6 +270,23 @@ class Track {
       name: json['Name'] as String,
       trackNumber: json['IndexNumber'] as int?,
       runtime: json['RunTimeTicks'] as int?,
+      isFavorite: json['UserData']?['IsFavorite'] as bool? ?? false,
+    );
+  }
+
+  Track copyWith({
+    String? id,
+    String? name,
+    int? trackNumber,
+    int? runtime,
+    bool? isFavorite,
+  }) {
+    return Track(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      trackNumber: trackNumber ?? this.trackNumber,
+      runtime: runtime ?? this.runtime,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 

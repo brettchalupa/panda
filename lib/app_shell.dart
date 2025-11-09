@@ -24,7 +24,7 @@ class AppShell extends StatelessWidget {
               },
             ),
           ),
-          const NowPlayingBar(),
+          NowPlayingBar(api: api),
         ],
       ),
     );

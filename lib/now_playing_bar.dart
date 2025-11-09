@@ -1,10 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'audio_player_service.dart';
 import 'now_playing_screen.dart';
+import 'jellyfin_api.dart';
 
-class NowPlayingBar extends StatelessWidget {
-  const NowPlayingBar({super.key});
+class NowPlayingBar extends StatefulWidget {
+  final JellyfinApi api;
+
+  const NowPlayingBar({super.key, required this.api});
+
+  @override
+  State<NowPlayingBar> createState() => _NowPlayingBarState();
+}
+
+class _NowPlayingBarState extends State<NowPlayingBar> {
+  Future<void> _toggleFavorite(
+    Track track,
+    AudioPlayerService playerService,
+  ) async {
+    try {
+      if (track.isFavorite) {
+        await widget.api.unmarkFavorite(track.id);
+        playerService.updateTrackFavoriteStatus(track.id, false);
+      } else {
+        await widget.api.markFavorite(track.id);
+        playerService.updateTrackFavoriteStatus(track.id, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update favorite: $e')),
+        );
+      }
+    }
+  }
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -25,7 +55,9 @@ class NowPlayingBar extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const NowPlayingScreen()),
+          MaterialPageRoute(
+            builder: (context) => NowPlayingScreen(api: widget.api),
+          ),
         );
       },
       child: Container(
@@ -54,12 +86,14 @@ class NowPlayingBar extends StatelessWidget {
                   if (playerService.albumArtUrl != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
-                      child: Image.network(
-                        playerService.albumArtUrl!,
+                      child: CachedNetworkImage(
+                        imageUrl: playerService.albumArtUrl!,
                         width: 48,
                         height: 48,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
+                        placeholder: (context, url) =>
+                            const Icon(Icons.album, size: 48),
+                        errorWidget: (context, url, error) =>
                             const Icon(Icons.album, size: 48),
                       ),
                     )
@@ -109,6 +143,21 @@ class NowPlayingBar extends StatelessWidget {
                     onPressed: playerService.hasNext
                         ? playerService.playNext
                         : null,
+                  ),
+                  // Favorite button
+                  IconButton(
+                    icon: Icon(
+                      playerService.currentTrack!.isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: playerService.currentTrack!.isFavorite
+                          ? Colors.red
+                          : null,
+                    ),
+                    onPressed: () => _toggleFavorite(
+                      playerService.currentTrack!,
+                      playerService,
+                    ),
                   ),
                 ],
               ),
