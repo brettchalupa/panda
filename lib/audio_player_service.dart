@@ -3,6 +3,20 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:audio_service/audio_service.dart';
 import 'jellyfin_api.dart';
 
+class QueueItem {
+  final Track track;
+  final Album album;
+  final String streamUrl;
+  final String? albumArtUrl;
+
+  QueueItem({
+    required this.track,
+    required this.album,
+    required this.streamUrl,
+    required this.albumArtUrl,
+  });
+}
+
 class AudioPlayerService extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
   AudioHandler? _audioHandler;
@@ -12,6 +26,8 @@ class AudioPlayerService extends ChangeNotifier {
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   String? _albumArtUrl;
+  final List<QueueItem> _queue = [];
+  int _currentQueueIndex = -1;
 
   Track? get currentTrack => _currentTrack;
   Album? get currentAlbum => _currentAlbum;
@@ -19,6 +35,10 @@ class AudioPlayerService extends ChangeNotifier {
   Duration get position => _position;
   Duration get duration => _duration;
   String? get albumArtUrl => _albumArtUrl;
+  List<QueueItem> get queue => List.unmodifiable(_queue);
+  int get queueIndex => _currentQueueIndex;
+  bool get hasNext => _currentQueueIndex < _queue.length - 1;
+  bool get hasPrevious => _currentQueueIndex > 0;
 
   double get progress {
     if (_duration.inMilliseconds == 0) return 0.0;
@@ -44,6 +64,13 @@ class AudioPlayerService extends ChangeNotifier {
       _duration = duration;
       notifyListeners();
     });
+
+    _audioPlayer.onPlayerComplete.listen((_) {
+      // Auto-play next track when current track finishes
+      if (hasNext) {
+        playNext();
+      }
+    });
   }
 
   Future<void> _init() async {
@@ -62,6 +89,8 @@ class AudioPlayerService extends ChangeNotifier {
       (_audioHandler as StingrayAudioHandler).updatePlaybackState(
         playing: _isPlaying,
         position: _position,
+        hasNext: hasNext,
+        hasPrevious: hasPrevious,
       );
     }
   }
@@ -81,7 +110,8 @@ class AudioPlayerService extends ChangeNotifier {
     }
   }
 
-  Future<void> playTrack(
+  /// Internal method to play a track without modifying the queue
+  Future<void> _playTrackInternal(
     Track track,
     Album album,
     String streamUrl,
@@ -94,6 +124,59 @@ class AudioPlayerService extends ChangeNotifier {
     _updateMediaItem();
     _updatePlaybackState();
     notifyListeners();
+  }
+
+  /// Play a track and optionally set up a queue with remaining tracks
+  Future<void> playTrack(
+    Track track,
+    Album album,
+    String streamUrl,
+    String? albumArtUrl, {
+    List<QueueItem>? queue,
+    int queueIndex = 0,
+  }) async {
+    if (queue != null) {
+      _queue.clear();
+      _queue.addAll(queue);
+      _currentQueueIndex = queueIndex;
+    } else {
+      _queue.clear();
+      _queue.add(
+        QueueItem(
+          track: track,
+          album: album,
+          streamUrl: streamUrl,
+          albumArtUrl: albumArtUrl,
+        ),
+      );
+      _currentQueueIndex = 0;
+    }
+
+    await _playTrackInternal(track, album, streamUrl, albumArtUrl);
+  }
+
+  Future<void> playNext() async {
+    if (!hasNext) return;
+    _currentQueueIndex++;
+    final item = _queue[_currentQueueIndex];
+    await _playTrackInternal(
+      item.track,
+      item.album,
+      item.streamUrl,
+      item.albumArtUrl,
+    );
+  }
+
+  Future<void> playPrevious() async {
+    if (!hasPrevious) return;
+    _currentQueueIndex--;
+    final item = _queue[_currentQueueIndex];
+    await _playTrackInternal(
+      item.track,
+      item.album,
+      item.streamUrl,
+      item.albumArtUrl,
+    );
   }
 
   Future<void> togglePlayPause() async {
@@ -128,14 +211,21 @@ class StingrayAudioHandler extends BaseAudioHandler {
   void updatePlaybackState({
     required bool playing,
     required Duration position,
+    required bool hasNext,
+    required bool hasPrevious,
   }) {
+    final controls = <MediaControl>[];
+    if (hasPrevious) {
+      controls.add(MediaControl.skipToPrevious);
+    }
+    controls.add(playing ? MediaControl.pause : MediaControl.play);
+    if (hasNext) {
+      controls.add(MediaControl.skipToNext);
+    }
+
     playbackState.add(
       PlaybackState(
-        controls: [
-          MediaControl.skipToPrevious,
-          if (playing) MediaControl.pause else MediaControl.play,
-          MediaControl.skipToNext,
-        ],
+        controls: controls,
         systemActions: const {
           MediaAction.seek,
           MediaAction.seekForward,
@@ -185,5 +275,15 @@ class StingrayAudioHandler extends BaseAudioHandler {
   @override
   Future<void> stop() async {
     await _service.stop();
+  }
+
+  @override
+  Future<void> skipToNext() async {
+    await _service.playNext();
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    await _service.playPrevious();
   }
 }

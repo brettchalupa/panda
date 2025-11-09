@@ -79,12 +79,26 @@ class NowPlayingBar extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Previous button
+                IconButton(
+                  icon: const Icon(Icons.skip_previous),
+                  onPressed: playerService.hasPrevious
+                      ? playerService.playPrevious
+                      : null,
+                ),
                 // Play/pause button
                 IconButton(
                   icon: Icon(
                     playerService.isPlaying ? Icons.pause : Icons.play_arrow,
                   ),
                   onPressed: playerService.togglePlayPause,
+                ),
+                // Next button
+                IconButton(
+                  icon: const Icon(Icons.skip_next),
+                  onPressed: playerService.hasNext
+                      ? playerService.playNext
+                      : null,
                 ),
               ],
             ),

@@ -40,9 +40,31 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   }
 
   void _playTrack(Track track, AudioPlayerService playerService) {
-    final url = widget.api.getStreamUrl(track.id);
+    if (_tracks == null) return;
+
     final albumArtUrl = widget.api.getAlbumArtUrl(widget.album.id);
-    playerService.playTrack(track, widget.album, url, albumArtUrl);
+    final trackIndex = _tracks!.indexOf(track);
+
+    // Build queue from all tracks
+    final queue = _tracks!.map((t) {
+      return QueueItem(
+        track: t,
+        album: widget.album,
+        streamUrl: widget.api.getStreamUrl(t.id),
+        albumArtUrl: albumArtUrl,
+      );
+    }).toList();
+
+    // Play the selected track with the full album queue
+    final url = widget.api.getStreamUrl(track.id);
+    playerService.playTrack(
+      track,
+      widget.album,
+      url,
+      albumArtUrl,
+      queue: queue,
+      queueIndex: trackIndex,
+    );
   }
 
   @override
