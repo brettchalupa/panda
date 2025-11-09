@@ -179,6 +179,18 @@ class AudioPlayerService extends ChangeNotifier {
     );
   }
 
+  Future<void> skipToQueueIndex(int index) async {
+    if (index < 0 || index >= _queue.length) return;
+    _currentQueueIndex = index;
+    final item = _queue[_currentQueueIndex];
+    await _playTrackInternal(
+      item.track,
+      item.album,
+      item.streamUrl,
+      item.albumArtUrl,
+    );
+  }
+
   Future<void> togglePlayPause() async {
     if (_isPlaying) {
       await _audioPlayer.pause();
