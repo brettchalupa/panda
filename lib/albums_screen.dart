@@ -2,21 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'jellyfin_api.dart';
-import 'session_manager.dart';
 import 'album_detail_screen.dart';
 import 'audio_player_service.dart';
+import 'app_settings_screen.dart';
 import 'favorites_screen.dart';
 
 class AlbumsScreen extends StatefulWidget {
   final JellyfinApi api;
   final String libraryId;
   final String libraryName;
+  final VoidCallback? onLibraryChanged;
 
   const AlbumsScreen({
     super.key,
     required this.api,
     required this.libraryId,
     required this.libraryName,
+    this.onLibraryChanged,
   });
 
   @override
@@ -64,32 +66,25 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
     }
   }
 
-  Future<void> _signOut() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sign Out'),
-          ),
-        ],
+  void _openSettings() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AppSettingsScreen(api: widget.api),
       ),
     );
 
-    if (confirmed == true && mounted) {
-      await SessionManager.clearSession();
-      // Pop back to main screen
-      if (mounted) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
-      }
+    // If library was changed, notify the callback
+    if (result == true && widget.onLibraryChanged != null) {
+      widget.onLibraryChanged!();
     }
+  }
+
+  void _viewFavorites() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => FavoritesScreen(api: widget.api)),
+    );
   }
 
   @override
@@ -101,20 +96,13 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.favorite),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => FavoritesScreen(api: widget.api),
-                ),
-              );
-            },
+            onPressed: _viewFavorites,
             tooltip: 'Favorites',
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _signOut,
-            tooltip: 'Sign Out',
+            icon: const Icon(Icons.settings),
+            onPressed: _openSettings,
+            tooltip: 'Settings',
           ),
         ],
       ),

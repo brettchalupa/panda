@@ -5,6 +5,7 @@ class JellyfinApi {
   final String serverUrl;
   String? accessToken;
   String? userId;
+  String? userName;
 
   JellyfinApi(this.serverUrl);
 
@@ -31,6 +32,7 @@ class JellyfinApi {
       final result = AuthenticationResult.fromJson(data);
       accessToken = result.accessToken;
       userId = result.userId;
+      userName = result.userName;
       return result;
     } else {
       throw Exception(

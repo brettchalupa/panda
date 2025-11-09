@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'settings_screen.dart';
@@ -26,31 +25,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
         home: const MyHomePage(title: 'Stingray'),
-        builder: (context, child) {
-          return _EscapeHandler(child: child!);
-        },
       ),
-    );
-  }
-}
-
-class _EscapeHandler extends StatelessWidget {
-  final Widget child;
-
-  const _EscapeHandler({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.escape): () {
-          final navigator = Navigator.of(context, rootNavigator: false);
-          if (navigator.canPop()) {
-            navigator.pop();
-          }
-        },
-      },
-      child: Focus(autofocus: true, child: child),
     );
   }
 }
@@ -96,11 +71,13 @@ class _MyHomePageState extends State<MyHomePage> {
         // Auto-login with existing session
         final accessToken = await SessionManager.getAccessToken();
         final userId = await SessionManager.getUserId();
+        final userName = await SessionManager.getUserName();
 
         if (accessToken != null && userId != null && mounted) {
           final api = JellyfinApi(_serverUrl);
           api.accessToken = accessToken;
           api.userId = userId;
+          api.userName = userName;
 
           Navigator.pushReplacement(
             context,
