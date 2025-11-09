@@ -257,6 +257,10 @@ class Track {
   final int? trackNumber;
   final int? runtime; // in ticks (10000 ticks = 1ms)
   final bool isFavorite;
+  final String? album;
+  final String? albumId;
+  final String? albumArtist;
+  final List<String>? artists;
 
   Track({
     required this.id,
@@ -264,6 +268,10 @@ class Track {
     this.trackNumber,
     this.runtime,
     this.isFavorite = false,
+    this.album,
+    this.albumId,
+    this.albumArtist,
+    this.artists,
   });
 
   factory Track.fromJson(Map<String, dynamic> json) {
@@ -273,6 +281,12 @@ class Track {
       trackNumber: json['IndexNumber'] as int?,
       runtime: json['RunTimeTicks'] as int?,
       isFavorite: json['UserData']?['IsFavorite'] as bool? ?? false,
+      album: json['Album'] as String?,
+      albumId: json['AlbumId'] as String?,
+      albumArtist: json['AlbumArtist'] as String?,
+      artists: (json['Artists'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
   }
 
@@ -282,6 +296,10 @@ class Track {
     int? trackNumber,
     int? runtime,
     bool? isFavorite,
+    String? album,
+    String? albumId,
+    String? albumArtist,
+    List<String>? artists,
   }) {
     return Track(
       id: id ?? this.id,
@@ -289,6 +307,10 @@ class Track {
       trackNumber: trackNumber ?? this.trackNumber,
       runtime: runtime ?? this.runtime,
       isFavorite: isFavorite ?? this.isFavorite,
+      album: album ?? this.album,
+      albumId: albumId ?? this.albumId,
+      albumArtist: albumArtist ?? this.albumArtist,
+      artists: artists ?? this.artists,
     );
   }
 

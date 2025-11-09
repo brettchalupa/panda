@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'jellyfin_api.dart';
 import 'audio_player_service.dart';
 
@@ -45,21 +46,35 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
     // Build queue from all favorite tracks
     final queue = _favoriteTracks!.map((t) {
+      final albumArtUrl = t.albumId != null
+          ? widget.api.getAlbumArtUrl(t.albumId!, maxWidth: 600, maxHeight: 600)
+          : null;
       return QueueItem(
         track: t,
-        album: Album(id: '', name: 'Favorites', artist: null),
+        album: Album(
+          id: t.albumId ?? '',
+          name: t.album ?? 'Unknown Album',
+          artist: t.albumArtist,
+        ),
         streamUrl: widget.api.getStreamUrl(t.id),
-        albumArtUrl: null,
+        albumArtUrl: albumArtUrl,
       );
     }).toList();
 
     // Play the selected track with favorites queue
     final url = widget.api.getStreamUrl(track.id);
+    final albumArtUrl = track.albumId != null
+        ? widget.api.getAlbumArtUrl(track.albumId!, maxWidth: 600, maxHeight: 600)
+        : null;
     playerService.playTrack(
       track,
-      Album(id: '', name: 'Favorites', artist: null),
+      Album(
+        id: track.albumId ?? '',
+        name: track.album ?? 'Unknown Album',
+        artist: track.albumArtist,
+      ),
       url,
-      null,
+      albumArtUrl,
       queue: queue,
       queueIndex: trackIndex,
     );
@@ -123,11 +138,56 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 final track = _favoriteTracks![index];
                 final isCurrentTrack =
                     playerService.currentTrack?.id == track.id;
+                final albumArtUrl = track.albumId != null
+                    ? widget.api.getAlbumArtUrl(
+                        track.albumId!,
+                        maxWidth: 100,
+                        maxHeight: 100,
+                      )
+                    : null;
+
                 return ListTile(
-                  leading: isCurrentTrack && playerService.isPlaying
-                      ? const Icon(Icons.volume_up)
-                      : const Icon(Icons.music_note),
+                  leading: albumArtUrl != null
+                      ? SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: albumArtUrl,
+                                fit: BoxFit.cover,
+                                fadeInDuration: Duration.zero,
+                                fadeOutDuration: Duration.zero,
+                                placeholder: (context, url) =>
+                                    const Icon(Icons.album, size: 56),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.album, size: 56),
+                              ),
+                              if (isCurrentTrack && playerService.isPlaying)
+                                Container(
+                                  color: Colors.black54,
+                                  child: const Icon(
+                                    Icons.volume_up,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        )
+                      : SizedBox(
+                          width: 56,
+                          height: 56,
+                          child: isCurrentTrack && playerService.isPlaying
+                              ? const Icon(Icons.volume_up)
+                              : const Icon(Icons.music_note),
+                        ),
                   title: Text(track.name),
+                  subtitle: Text(
+                    '${track.albumArtist ?? 'Unknown Artist'} • ${track.album ?? 'Unknown Album'}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
