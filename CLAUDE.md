@@ -53,6 +53,9 @@ stingray/
 - `shared_preferences: ^2.2.2` - For storing user configuration (server URL, etc.)
 - `flutter_secure_storage: ^9.0.0` - For securely storing authentication tokens
 - `audioplayers: ^6.0.0` - For audio playback (requires GStreamer on Linux)
+- `audio_service: ^0.18.15` - For media session integration and background playback
+- `audio_service_mpris: ^0.1.3` - For Linux MPRIS support (media keys)
+- `provider: ^6.1.0` - For global state management
 - `cupertino_icons: ^1.0.8` - Icon fonts
 
 ### Development Tools
@@ -109,6 +112,27 @@ Currently using basic Flutter `StatefulWidget` patterns. As the app grows, we ma
 - Use `SessionManager` helper class for all auth operations
 
 **Important**: Never use `shared_preferences` for tokens! Always use `SessionManager` for auth data.
+
+### Media Key Support
+
+**Linux Integration via MPRIS**:
+- Uses `audio_service` with `audio_service_mpris` plugin
+- Integrates with D-Bus MPRIS (Media Player Remote Interfacing Specification)
+- Provides system-wide media controls through desktop environment
+- Works with KDE, GNOME, and other Linux desktop environments
+
+**Implementation**:
+- `AudioPlayerService` wraps the audio player with `audio_service`
+- `StingrayAudioHandler` extends `BaseAudioHandler` to handle media control events
+- Updates media metadata (track, album, artist, artwork) to system
+- Broadcasts playback state (playing/paused, position, duration)
+- Responds to media key events (play, pause, stop)
+
+**Supported Controls**:
+- Play/Pause toggle
+- Stop
+- Track metadata display in system media controls
+- Album artwork in system notifications (when available)
 
 ## Testing Strategy
 
@@ -190,15 +214,16 @@ Before committing:
 Things to build (in small chunks!):
 
 1. ~~Server configuration~~ ✅
-2. Authentication with Jellyfin
-3. Browse music library
-4. Playback controls
-5. Native media key support
-6. Playlists
-7. Queue management
-8. Album art display
-9. Search functionality
-10. Additional platforms (macOS, Windows)
+2. ~~Authentication with Jellyfin~~ ✅
+3. ~~Browse music library~~ ✅
+4. ~~Playback controls~~ ✅
+5. ~~Native media key support~~ ✅
+6. ~~Album art display~~ ✅
+7. Queue management / next/previous
+8. Seek controls
+9. Playlists
+10. Search functionality
+11. Additional platforms (macOS, Windows)
 
 ## Tips for Claude
 
@@ -218,21 +243,24 @@ Things to build (in small chunks!):
 - ✅ Server configuration with persistence
 - ✅ Settings screen with validation
 - ✅ Secure authentication with encrypted token storage
+- ✅ Auto-login with session persistence
 - ✅ Music library selection
 - ✅ Album browsing and listing
 - ✅ Track listing with duration display
 - ✅ Audio playback with play/pause controls
+- ✅ Global persistent now playing bar (seamless across navigation)
+- ✅ Track progress indicator and album art display
+- ✅ Native media key support via MPRIS (Linux)
 - ✅ Sign out functionality
 - ✅ Comprehensive test coverage (11 tests)
 - ✅ Fast development workflow (`ok` script)
 
 **Next steps**:
 
-- Persistent player controls
-- Native media key support
-- Queue management / playlist
-- Album art display
+- Queue management / next/previous track
+- Seek controls
 - Search functionality
+- Playlist support
 
 ## Notes
 
