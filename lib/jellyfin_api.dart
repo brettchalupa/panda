@@ -119,6 +119,11 @@ class JellyfinApi {
   String getStreamUrl(String itemId) {
     return '$serverUrl/Audio/$itemId/stream?static=true&api_key=$accessToken';
   }
+
+  String? getAlbumArtUrl(String itemId) {
+    if (accessToken == null) return null;
+    return '$serverUrl/Items/$itemId/Images/Primary?api_key=$accessToken';
+  }
 }
 
 class AuthenticationResult {

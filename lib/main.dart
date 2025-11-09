@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import 'settings_screen.dart';
 import 'login_screen.dart';
+import 'audio_player_service.dart';
+import 'session_manager.dart';
+import 'jellyfin_api.dart';
+import 'app_shell.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,12 +17,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Stingray',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return ChangeNotifierProvider(
+      create: (_) => AudioPlayerService(),
+      child: MaterialApp(
+        title: 'Stingray',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        home: const MyHomePage(title: 'Stingray'),
       ),
-      home: const MyHomePage(title: 'Stingray'),
     );
   }
 }
@@ -55,6 +63,28 @@ class _MyHomePageState extends State<MyHomePage> {
         _status = 'No server configured';
       }
     });
+
+    // Check if already logged in
+    if (_hasServer && mounted) {
+      final hasSession = await SessionManager.hasSession();
+      if (hasSession) {
+        // Auto-login with existing session
+        final accessToken = await SessionManager.getAccessToken();
+        final userId = await SessionManager.getUserId();
+
+        if (accessToken != null && userId != null && mounted) {
+          final api = JellyfinApi(_serverUrl);
+          api.accessToken = accessToken;
+          api.userId = userId;
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => AppShell(api: api)),
+          );
+          return;
+        }
+      }
+    }
 
     // If no server configured, show settings
     if (!_hasServer && mounted) {

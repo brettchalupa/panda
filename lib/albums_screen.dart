@@ -87,60 +87,68 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Error loading albums',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(_errorMessage!),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _isLoading = true;
-                        _errorMessage = null;
-                      });
-                      _loadAlbums();
+      body: Column(
+        children: [
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Error loading albums',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(_errorMessage!),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _isLoading = true;
+                              _errorMessage = null;
+                            });
+                            _loadAlbums();
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                : _albums!.isEmpty
+                ? const Center(child: Text('No albums found'))
+                : ListView.builder(
+                    itemCount: _albums!.length,
+                    itemBuilder: (context, index) {
+                      final album = _albums![index];
+                      return ListTile(
+                        leading: const Icon(Icons.album),
+                        title: Text(album.name),
+                        subtitle: Text(
+                          [
+                            if (album.artist != null) album.artist,
+                            if (album.year != null) album.year.toString(),
+                          ].join(' • '),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AlbumDetailScreen(
+                                api: widget.api,
+                                album: album,
+                              ),
+                            ),
+                          );
+                        },
+                      );
                     },
-                    child: const Text('Retry'),
                   ),
-                ],
-              ),
-            )
-          : _albums!.isEmpty
-          ? const Center(child: Text('No albums found'))
-          : ListView.builder(
-              itemCount: _albums!.length,
-              itemBuilder: (context, index) {
-                final album = _albums![index];
-                return ListTile(
-                  leading: const Icon(Icons.album),
-                  title: Text(album.name),
-                  subtitle: Text(
-                    [
-                      if (album.artist != null) album.artist,
-                      if (album.year != null) album.year.toString(),
-                    ].join(' • '),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            AlbumDetailScreen(api: widget.api, album: album),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+          ),
+        ],
+      ),
     );
   }
 }

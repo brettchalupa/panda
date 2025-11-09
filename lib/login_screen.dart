@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'jellyfin_api.dart';
-import 'library_selection_screen.dart';
 import 'session_manager.dart';
+import 'app_shell.dart';
 
 class LoginScreen extends StatefulWidget {
   final String serverUrl;
@@ -53,9 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => LibrarySelectionScreen(api: api),
-          ),
+          MaterialPageRoute(builder: (context) => AppShell(api: api)),
         );
       }
     } catch (e) {

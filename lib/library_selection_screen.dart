@@ -38,7 +38,7 @@ class _LibrarySelectionScreenState extends State<LibrarySelectionScreen> {
   }
 
   void _selectLibrary(MediaFolder folder) {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AlbumsScreen(

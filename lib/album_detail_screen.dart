@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:provider/provider.dart';
 import 'jellyfin_api.dart';
+import 'audio_player_service.dart';
 
 class AlbumDetailScreen extends StatefulWidget {
   final JellyfinApi api;
@@ -16,29 +17,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   List<Track>? _tracks;
   bool _isLoading = true;
   String? _errorMessage;
-  final AudioPlayer _audioPlayer = AudioPlayer();
-  Track? _currentTrack;
-  bool _isPlaying = false;
 
   @override
   void initState() {
     super.initState();
     _loadTracks();
-    _setupAudioPlayer();
-  }
-
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
-  void _setupAudioPlayer() {
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      setState(() {
-        _isPlaying = state == PlayerState.playing;
-      });
-    });
   }
 
   Future<void> _loadTracks() async {
@@ -56,24 +39,16 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     }
   }
 
-  Future<void> _playTrack(Track track) async {
+  void _playTrack(Track track, AudioPlayerService playerService) {
     final url = widget.api.getStreamUrl(track.id);
-    await _audioPlayer.play(UrlSource(url));
-    setState(() {
-      _currentTrack = track;
-    });
-  }
-
-  Future<void> _togglePlayPause() async {
-    if (_isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.resume();
-    }
+    final albumArtUrl = widget.api.getAlbumArtUrl(widget.album.id);
+    playerService.playTrack(track, widget.album, url, albumArtUrl);
   }
 
   @override
   Widget build(BuildContext context) {
+    final playerService = Provider.of<AudioPlayerService>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.album.name),
@@ -146,7 +121,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     itemCount: _tracks!.length,
                     itemBuilder: (context, index) {
                       final track = _tracks![index];
-                      final isCurrentTrack = _currentTrack?.id == track.id;
+                      final isCurrentTrack =
+                          playerService.currentTrack?.id == track.id;
                       return ListTile(
                         leading: Text(
                           track.trackNumber?.toString() ?? '',
@@ -162,53 +138,16 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                             const SizedBox(width: 8),
-                            if (isCurrentTrack && _isPlaying)
+                            if (isCurrentTrack && playerService.isPlaying)
                               const Icon(Icons.volume_up, size: 20),
                           ],
                         ),
                         selected: isCurrentTrack,
-                        onTap: () => _playTrack(track),
+                        onTap: () => _playTrack(track, playerService),
                       );
                     },
                   ),
           ),
-          // Now playing bar
-          if (_currentTrack != null)
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                border: Border(
-                  top: BorderSide(color: Theme.of(context).dividerColor),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _currentTrack!.name,
-                          style: Theme.of(context).textTheme.titleSmall,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          widget.album.artist ?? '',
-                          style: Theme.of(context).textTheme.bodySmall,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                    onPressed: _togglePlayPause,
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
     );
