@@ -52,7 +52,7 @@ install:
 
     echo "Creating desktop entry..."
     mkdir -p ~/.local/share/applications
-    cat > ~/.local/share/applications/stingray.desktop << 'EOF'
+    cat > ~/.local/share/applications/com.brettchalupa.stingray.desktop << 'EOF'
     [Desktop Entry]
     Name=Stingray
     Comment=Jellyfin Music Player
@@ -61,9 +61,10 @@ install:
     Type=Application
     Categories=AudioVideo;Audio;Player;
     StartupNotify=true
+    StartupWMClass=com.brettchalupa.stingray
     EOF
 
-    chmod +x ~/.local/share/applications/stingray.desktop
+    chmod +x ~/.local/share/applications/com.brettchalupa.stingray.desktop
 
     # Update desktop database if available
     if command -v update-desktop-database &> /dev/null; then
@@ -83,7 +84,7 @@ uninstall:
     echo "Uninstalling Stingray..."
     rm -rf ~/.local/share/stingray
     rm -f ~/.local/bin/stingray
-    rm -f ~/.local/share/applications/stingray.desktop
+    rm -f ~/.local/share/applications/com.brettchalupa.stingray.desktop
 
     if command -v update-desktop-database &> /dev/null; then
         update-desktop-database ~/.local/share/applications
