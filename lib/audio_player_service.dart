@@ -20,6 +20,16 @@ class QueueItem {
 class AudioPlayerService extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
   AudioHandler? _audioHandler;
+
+  // Configure position updater for reduced CPU usage
+  void _configureAudioPlayer() {
+    // Update position only once per second to reduce CPU usage
+    _audioPlayer.positionUpdater = TimerPositionUpdater(
+      interval: const Duration(seconds: 1),
+      getPosition: () => _audioPlayer.getCurrentPosition(),
+    );
+  }
+
   Track? _currentTrack;
   Album? _currentAlbum;
   bool _isPlaying = false;
@@ -29,7 +39,6 @@ class AudioPlayerService extends ChangeNotifier {
   final List<QueueItem> _queue = [];
   int _currentQueueIndex = -1;
   JellyfinApi? _api;
-  DateTime? _lastPositionUpdate;
 
   Track? get currentTrack => _currentTrack;
   Album? get currentAlbum => _currentAlbum;
@@ -90,6 +99,8 @@ class AudioPlayerService extends ChangeNotifier {
   }
 
   AudioPlayerService({bool initializeAudioService = true}) {
+    _configureAudioPlayer();
+
     if (initializeAudioService) {
       _init();
     }
@@ -102,16 +113,8 @@ class AudioPlayerService extends ChangeNotifier {
 
     _audioPlayer.onPositionChanged.listen((position) {
       _position = position;
-
-      // Throttle updates to reduce CPU usage
-      // Only update UI/MPRIS every 1 second (sufficient for progress bar)
-      final now = DateTime.now();
-      if (_lastPositionUpdate == null ||
-          now.difference(_lastPositionUpdate!) > const Duration(seconds: 1)) {
-        _lastPositionUpdate = now;
-        _updatePlaybackState();
-        notifyListeners();
-      }
+      _updatePlaybackState();
+      notifyListeners();
     });
 
     _audioPlayer.onDurationChanged.listen((duration) {
