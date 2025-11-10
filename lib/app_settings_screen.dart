@@ -45,8 +45,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
         });
       }
     } catch (e) {
-      print('Error loading settings: $e');
-      // Set defaults if loading fails
+      // Error loading settings - set defaults
       if (mounted) {
         setState(() {
           _libraryName = 'Error loading';
