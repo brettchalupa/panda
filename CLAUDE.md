@@ -77,7 +77,8 @@ stingray/
 **Key Commands**:
 
 - `just` or `just --list` - Show all available commands
-- `just ok` - Run all checks (format check + analyze)
+- `just ok` - Run all checks (format check + analyze + tests)
+- `just test` - Run tests only
 - `just fmt` - Format all Dart code
 - `just run` - Run the app in development mode
 - `just build` - Build release version for Linux
@@ -92,28 +93,25 @@ stingray/
 
 **The `just ok` Command**:
 
-Fast feedback loop (~3-5 seconds) that runs:
+Fast feedback loop that runs:
 
 1. Format check (`dart format --output=none --set-exit-if-changed`)
 2. Static analysis (`flutter analyze`)
+3. Tests (`flutter test`)
 
-**Important**: Optimized for speed and frequent use during development. Does NOT
-include:
+**Important**: Optimized for frequent use during development. Does NOT include:
 
 - `flutter doctor` (only needed for environment debugging)
 - `flutter pub get` (done automatically by analyze)
-- Tests (run separately with `flutter test`)
 - Full Linux build (use `just build` for that)
 
 **Usage**:
 
 ```bash
-just ok              # Quick checks
+just ok              # Run all checks (format, analyze, tests)
+just test            # Run tests only
 just release-and-install  # Build and install new version
 ```
-
-Must complete in ~10 seconds or less. If it gets slower, investigate and
-optimize.
 
 ### API Integration
 
