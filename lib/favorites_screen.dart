@@ -1,3 +1,4 @@
+import 'custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -103,10 +104,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     final playerService = Provider.of<AudioPlayerService>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Favorites'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      appBar: CustomAppBar(title: const Text('Favorites')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null

@@ -1,15 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
 import 'settings_screen.dart';
 import 'login_screen.dart';
 import 'audio_player_service.dart';
 import 'session_manager.dart';
 import 'jellyfin_api.dart';
 import 'app_shell.dart';
+import 'theme.dart';
+import 'theme_manager.dart';
+import 'custom_app_bar.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize window_manager to hide title bar
+  await windowManager.ensureInitialized();
+  await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeManager()),
+        ChangeNotifierProvider(create: (_) => AudioPlayerService()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -17,19 +35,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final audioPlayerService = AudioPlayerService();
-    return ChangeNotifierProvider.value(
-      value: audioPlayerService,
-      child: MaterialApp(
-        title: 'Stingray',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        ),
-        home: MyHomePage(
+    return Consumer<ThemeManager>(
+      builder: (context, themeManager, child) {
+        final audioPlayerService = Provider.of<AudioPlayerService>(context);
+        return MaterialApp(
           title: 'Stingray',
-          audioPlayerService: audioPlayerService,
-        ),
-      ),
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeManager.themeMode,
+          home: MyHomePage(
+            title: 'Stingray',
+            audioPlayerService: audioPlayerService,
+          ),
+        );
+      },
     );
   }
 }
@@ -138,9 +157,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      appBar: CustomAppBar(
         title: Text(widget.title),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),

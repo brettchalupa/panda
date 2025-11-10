@@ -1,9 +1,12 @@
+import 'custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 import 'jellyfin_api.dart';
 import 'session_manager.dart';
 import 'library_selection_screen.dart';
+import 'theme_manager.dart';
 
 class AppSettingsScreen extends StatefulWidget {
   final JellyfinApi api;
@@ -83,15 +86,89 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
     }
   }
 
+  String _getThemeModeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'Auto';
+    }
+  }
+
+  Future<void> _showThemeDialog(
+    BuildContext context,
+    ThemeManager themeManager,
+  ) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Theme'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Light'),
+              trailing: themeManager.themeMode == ThemeMode.light
+                  ? const Icon(Icons.check)
+                  : null,
+              onTap: () {
+                themeManager.setThemeMode(ThemeMode.light);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Dark'),
+              trailing: themeManager.themeMode == ThemeMode.dark
+                  ? const Icon(Icons.check)
+                  : null,
+              onTap: () {
+                themeManager.setThemeMode(ThemeMode.dark);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Auto'),
+              subtitle: const Text('Follow system setting'),
+              trailing: themeManager.themeMode == ThemeMode.system
+                  ? const Icon(Icons.check)
+                  : null,
+              onTap: () {
+                themeManager.setThemeMode(ThemeMode.system);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final themeManager = Provider.of<ThemeManager>(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      appBar: CustomAppBar(title: const Text('Settings')),
       body: ListView(
         children: [
+          // Appearance Section
+          ListTile(
+            title: Text(
+              'Appearance',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.palette),
+            title: const Text('Theme'),
+            subtitle: Text(_getThemeModeLabel(themeManager.themeMode)),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showThemeDialog(context, themeManager),
+          ),
+          const Divider(),
+
           // Library Section
           ListTile(
             title: Text(

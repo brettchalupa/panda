@@ -1,3 +1,4 @@
+import 'custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'jellyfin_api.dart';
@@ -52,10 +53,7 @@ class _LibrarySelectionScreenState extends State<LibrarySelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Music Library'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      appBar: CustomAppBar(title: const Text('Select Music Library')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null

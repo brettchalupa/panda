@@ -173,6 +173,36 @@ may need to introduce more sophisticated state management.
 - Track metadata display in system media controls
 - Album artwork in system notifications (when available)
 
+### Theming
+
+**Architecture**:
+- Centralized theme configuration in `lib/theme.dart`
+- Light and dark themes with Material 3 design
+- User-selectable theme mode (Light / Dark / Auto) stored in SharedPreferences
+- `ThemeManager` class manages theme state with Provider
+
+**Theme Mode Options**:
+- **Light**: Always use light theme
+- **Dark**: Always use dark theme
+- **Auto** (default): Follow system theme preference
+
+**Customizing Themes**:
+- Primary color seed: Change `_primarySeed` in `lib/theme.dart` (currently `Colors.deepOrange`)
+- Border radius, padding, elevation all configured in theme file
+- Both light and dark themes share same structure for consistency
+
+**Theme Manager**:
+- `ThemeManager` extends `ChangeNotifier` and persists theme preference
+- Stored in SharedPreferences as `theme_mode` (values: 'light', 'dark', 'system')
+- Access via `Provider.of<ThemeManager>(context)` or `Consumer<ThemeManager>`
+- UI for theme selection in Settings screen (Appearance section)
+
+**Best Practices**:
+- Always use theme colors: `Theme.of(context).colorScheme.primary`
+- Use semantic text styles: `Theme.of(context).textTheme.titleLarge`
+- Never hardcode colors like `Colors.blue` - use theme color roles
+- Test changes in both light and dark modes
+
 ## Testing Strategy
 
 **All features must have tests!** This is non-negotiable.

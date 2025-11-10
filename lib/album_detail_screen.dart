@@ -1,3 +1,4 @@
+import 'custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -120,10 +121,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.album.name),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      appBar: CustomAppBar(title: Text(widget.album.name)),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth > 600;

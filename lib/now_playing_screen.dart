@@ -1,3 +1,4 @@
+import 'custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -48,19 +49,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
     if (playerService.currentTrack == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Now Playing'),
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        ),
+        appBar: CustomAppBar(title: const Text('Now Playing')),
         body: const Center(child: Text('No track playing')),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Now Playing'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      appBar: CustomAppBar(title: const Text('Now Playing')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth > 700;
