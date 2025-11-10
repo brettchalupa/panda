@@ -1,4 +1,4 @@
-package com.example.stingray
+package com.example.panda
 
 import io.flutter.embedding.android.FlutterActivity
 

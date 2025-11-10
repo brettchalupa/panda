@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Package Stingray for release
+# Package Panda for release
 set -euo pipefail
 
 # Get version from pubspec.yaml
@@ -15,7 +15,7 @@ flutter build linux --release
 
 # Create release directory structure
 mkdir -p build/release
-RELEASE_DIR="build/release/stingray-${VERSION}-linux-x64"
+RELEASE_DIR="build/release/panda-${VERSION}-linux-x64"
 rm -rf "$RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
 
@@ -30,39 +30,39 @@ cat > "$RELEASE_DIR/install.sh" << 'EOFINSTALL'
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Installing Stingray to ~/.local/share/stingray..."
-rm -rf ~/.local/share/stingray
+echo "Installing Panda to ~/.local/share/panda..."
+rm -rf ~/.local/share/panda
 mkdir -p ~/.local/share
-cp -r . ~/.local/share/stingray
-chmod +x ~/.local/share/stingray/stingray
+cp -r . ~/.local/share/panda
+chmod +x ~/.local/share/panda/panda
 
 echo "Creating symlink in ~/.local/bin..."
 mkdir -p ~/.local/bin
-ln -sf ~/.local/share/stingray/stingray ~/.local/bin/stingray
+ln -sf ~/.local/share/panda/panda ~/.local/bin/panda
 
 echo "Creating desktop entry..."
 mkdir -p ~/.local/share/applications
-cat > ~/.local/share/applications/com.brettchalupa.stingray.desktop << 'EOF'
+cat > ~/.local/share/applications/com.brettchalupa.panda.desktop << 'EOF'
 [Desktop Entry]
-Name=Stingray
+Name=Panda
 Comment=Jellyfin Music Player
-Exec=stingray
+Exec=panda
 Terminal=false
 Type=Application
 Categories=AudioVideo;Audio;Player;
 StartupNotify=true
-StartupWMClass=com.brettchalupa.stingray
+StartupWMClass=com.brettchalupa.panda
 EOF
 
-chmod +x ~/.local/share/applications/com.brettchalupa.stingray.desktop
+chmod +x ~/.local/share/applications/com.brettchalupa.panda.desktop
 
 if command -v update-desktop-database &> /dev/null; then
     update-desktop-database ~/.local/share/applications
 fi
 
 echo "✓ Installation complete!"
-echo "  Launch with: stingray"
-echo "  Or search for 'Stingray' in your application menu"
+echo "  Launch with: panda"
+echo "  Or search for 'Panda' in your application menu"
 echo ""
 echo "Note: Make sure ~/.local/bin is in your PATH"
 EOFINSTALL
@@ -72,9 +72,9 @@ chmod +x "$RELEASE_DIR/install.sh"
 # Create tarball
 echo "Creating tarball..."
 cd build/release
-tar -czf "stingray-${VERSION}-linux-x64.tar.gz" "stingray-${VERSION}-linux-x64"
+tar -czf "panda-${VERSION}-linux-x64.tar.gz" "panda-${VERSION}-linux-x64"
 cd ../..
 
-echo "✓ Release package created: build/release/stingray-${VERSION}-linux-x64.tar.gz"
-echo "  To install: tar -xzf build/release/stingray-${VERSION}-linux-x64.tar.gz"
-echo "              cd stingray-${VERSION}-linux-x64 && ./install.sh"
+echo "✓ Release package created: build/release/panda-${VERSION}-linux-x64.tar.gz"
+echo "  To install: tar -xzf build/release/panda-${VERSION}-linux-x64.tar.gz"
+echo "              cd panda-${VERSION}-linux-x64 && ./install.sh"

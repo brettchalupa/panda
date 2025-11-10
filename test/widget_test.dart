@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
-import 'package:stingray/main.dart';
-import 'package:stingray/audio_player_service.dart';
-import 'package:stingray/theme_manager.dart';
+import 'package:panda/main.dart';
+import 'package:panda/audio_player_service.dart';
+import 'package:panda/theme_manager.dart';
 
 void main() {
   setUp(() {
@@ -35,7 +35,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify that the title is present.
-    expect(find.text('Stingray'), findsOneWidget);
+    expect(find.text('Panda'), findsOneWidget);
 
     // Verify server URL is displayed.
     expect(find.text('http://test-server:8096'), findsOneWidget);

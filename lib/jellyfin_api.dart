@@ -13,7 +13,7 @@ class JellyfinApi {
     // Jellyfin requires this header for API identification
     return {
       'X-Emby-Authorization':
-          'MediaBrowser Client="Stingray", Device="Flutter", DeviceId="stingray-1", Version="1.0.0"',
+          'MediaBrowser Client="Panda", Device="Flutter", DeviceId="panda-1", Version="1.0.0"',
     };
   }
 

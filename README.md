@@ -1,7 +1,7 @@
-# Stingray
+# Panda
 
 A native desktop music player for Jellyfin, built with Flutter. Inspired by
-Plexamp, Stingray provides a high-quality music listening experience with
+Plexamp, Panda provides a high-quality music listening experience with
 seamless Jellyfin integration, native media key support, and a clean, functional
 interface.
 
@@ -20,7 +20,7 @@ interface.
 
 ## Screenshots
 
-![Screenhot of Stingray v0.1, showing the album list view](https://assets.brettchalupa.com/uploads/stingray-0.1.0.webp)
+![Screenshot of Panda v0.1, showing the album list view](https://assets.brettchalupa.com/uploads/stingray-0.1.0.webp)
 
 ## Installation
 
@@ -61,8 +61,8 @@ sudo apt install just  # Ubuntu/Debian
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/brettchalupa/stingray.git
-   cd stingray
+   git clone https://github.com/brettchalupa/panda.git
+   cd panda
    ```
 
 2. **Get dependencies**:
@@ -76,7 +76,7 @@ sudo apt install just  # Ubuntu/Debian
    just release-and-install
    ```
 
-The app will be installed to `~/.local/share/stingray` with a launcher in your
+The app will be installed to `~/.local/share/panda` with a launcher in your
 application menu.
 
 ### Running from Source
@@ -89,7 +89,7 @@ just run
 
 ## Usage
 
-1. **Launch Stingray** from your application menu or run `stingray` in terminal
+1. **Launch Panda** from your application menu or run `panda` in terminal
 2. **Configure Server**: Enter your Jellyfin server URL (e.g.,
    `http://localhost:8096`)
 3. **Sign In**: Authenticate with your Jellyfin credentials
@@ -124,7 +124,7 @@ just release-and-install
 ### Project Structure
 
 ```
-stingray/
+panda/
 ├── lib/                    # Application source code
 │   ├── main.dart          # App entry point
 │   ├── jellyfin_api.dart  # Jellyfin API client
@@ -175,7 +175,7 @@ stingray/
 
 **Current Focus: Linux Desktop**
 
-Stingray is being developed primarily for Linux desktop environments. Once it's stable and feature-complete on Linux, we'll expand to other platforms.
+Panda is being developed primarily for Linux desktop environments. Once it's stable and feature-complete on Linux, we'll expand to other platforms.
 
 | Platform | Status       |
 | -------- | ------------ |
@@ -205,7 +205,7 @@ This is free and unencumbered software released into the public domain.
 
 ### Version Numbering
 
-Stingray uses [Semantic Versioning](https://semver.org/):
+Panda uses [Semantic Versioning](https://semver.org/):
 
 - Version format: `MAJOR.MINOR.PATCH+BUILD`
 - Example: `0.1.0+1`
@@ -230,14 +230,14 @@ The **build number** is an incremental counter that helps distinguish between di
    just package
    ```
 
-4. The tarball will be created in `build/release/stingray-VERSION-linux-x64.tar.gz`
+4. The tarball will be created in `build/release/panda-VERSION-linux-x64.tar.gz`
 
 5. Test the package:
 
    ```bash
    cd build/release
-   tar -xzf stingray-VERSION-linux-x64.tar.gz
-   cd stingray-VERSION-linux-x64
+   tar -xzf panda-VERSION-linux-x64.tar.gz
+   cd panda-VERSION-linux-x64
    ./install.sh
    ```
 
@@ -248,6 +248,6 @@ See `CHANGELOG.md` for release history.
 ## Support
 
 For bugs and feature requests, please
-[open an issue](https://github.com/brettchalupa/stingray/issues).
+[open an issue](https://github.com/brettchalupa/panda/issues).
 
 For development guidance, see [CLAUDE.md](CLAUDE.md).
