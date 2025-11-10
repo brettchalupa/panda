@@ -31,16 +31,31 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   }
 
   Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    final packageInfo = await PackageInfo.fromPlatform();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final packageInfo = await PackageInfo.fromPlatform();
 
-    setState(() {
-      _libraryName = prefs.getString('last_library_name');
-      _serverUrl = prefs.getString('server_url');
-      _userName = widget.api.userName;
-      _version = packageInfo.version;
-      _buildNumber = packageInfo.buildNumber;
-    });
+      if (mounted) {
+        setState(() {
+          _libraryName = prefs.getString('last_library_name');
+          _serverUrl = prefs.getString('server_url');
+          _userName = widget.api.userName;
+          _version = packageInfo.version;
+          _buildNumber = packageInfo.buildNumber;
+        });
+      }
+    } catch (e) {
+      // Error loading settings - set defaults
+      if (mounted) {
+        setState(() {
+          _libraryName = 'Error loading';
+          _serverUrl = 'Error loading';
+          _userName = 'Error loading';
+          _version = 'Error';
+          _buildNumber = 'Error';
+        });
+      }
+    }
   }
 
   Future<void> _signOut() async {
