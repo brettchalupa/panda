@@ -64,7 +64,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     // Play the selected track with favorites queue
     final url = widget.api.getStreamUrl(track.id);
     final albumArtUrl = track.albumId != null
-        ? widget.api.getAlbumArtUrl(track.albumId!, maxWidth: 600, maxHeight: 600)
+        ? widget.api.getAlbumArtUrl(
+            track.albumId!,
+            maxWidth: 600,
+            maxHeight: 600,
+          )
         : null;
     playerService.playTrack(
       track,

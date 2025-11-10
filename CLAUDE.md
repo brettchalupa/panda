@@ -2,32 +2,39 @@
 
 ## Project Overview
 
-Stingray is a native music player for Jellyfin, inspired by Plexamp. The goal is to create a high-quality desktop music player with native media key support and seamless integration with Jellyfin music libraries.
+Stingray is a native music player for Jellyfin, inspired by Plexamp. The goal is
+to create a high-quality desktop music player with native media key support and
+seamless integration with Jellyfin music libraries.
 
-**Current Focus**: Linux desktop development
-**Primary Target Platform**: Linux (will expand to other platforms later)
+**Current Focus**: Linux desktop development **Primary Target Platform**: Linux
+(will expand to other platforms later)
 
 ## System Requirements (Linux)
 
 Before building, install these system dependencies:
 
 **Fedora/RHEL**:
+
 ```bash
 sudo dnf install gstreamer1-devel gstreamer1-plugins-base-devel gstreamer1-plugins-good gstreamer1-plugins-bad-free libsecret-devel
 ```
 
 **Ubuntu/Debian**:
+
 ```bash
 sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libsecret-1-dev
 ```
 
 **What they're for**:
+
 - GStreamer: Required for `audioplayers` package (audio playback)
-- libsecret: Required for `flutter_secure_storage` package (encrypted token storage)
+- libsecret: Required for `flutter_secure_storage` package (encrypted token
+  storage)
 
 ## Development Philosophy
 
-**Work in small chunks!** This is critical. Break down features into the smallest possible increments that can be tested and verified independently.
+**Work in small chunks!** This is critical. Break down features into the
+smallest possible increments that can be tested and verified independently.
 
 ## Project Structure
 
@@ -50,44 +57,68 @@ stingray/
 ### Dependencies
 
 - `http: ^1.2.0` - For API requests to Jellyfin server
-- `shared_preferences: ^2.2.2` - For storing user configuration (server URL, etc.)
+- `shared_preferences: ^2.2.2` - For storing user configuration (server URL,
+  etc.)
 - `flutter_secure_storage: ^9.0.0` - For securely storing authentication tokens
 - `audioplayers: ^6.0.0` - For audio playback (requires GStreamer on Linux)
-- `audio_service: ^0.18.15` - For media session integration and background playback
+- `audio_service: ^0.18.15` - For media session integration and background
+  playback
 - `audio_service_mpris: ^0.1.3` - For Linux MPRIS support (media keys)
 - `provider: ^6.1.0` - For global state management
 - `cupertino_icons: ^1.0.8` - Icon fonts
 
 ### Development Tools
 
-#### The `ok` Script
+#### Just Commands (`justfile`)
 
-**Purpose**: Fast feedback loop for developers (~6 seconds)
-**Location**: `./ok` in project root
+**Purpose**: Task automation and fast feedback loop for developers **Location**:
+`justfile` in project root
 
-**What it does**:
+**Key Commands**:
 
-1. Format check (`dart format`)
+- `just` or `just --list` - Show all available commands
+- `just ok` - Run all checks (format check + analyze)
+- `just fmt` - Format all Dart code
+- `just run` - Run the app in development mode
+- `just build` - Build release version for Linux
+- `just release` - Clean and build optimized release
+- `just install` - Install app to `~/.local/share/stingray`
+- `just release-and-install` - Build, install, and launch
+- `just launch` - Launch the installed app
+- `just uninstall` - Remove the installed app
+- `just clean` - Clean build artifacts
+- `just deps` - Get Flutter dependencies
+- `just doctor` - Run Flutter doctor
+
+**The `just ok` Command**:
+
+Fast feedback loop (~3-5 seconds) that runs:
+
+1. Format check (`dart format --output=none --set-exit-if-changed`)
 2. Static analysis (`flutter analyze`)
-3. Run all tests (`flutter test`)
 
-**Important**: This script is optimized for speed and frequent use during development. It does NOT include:
+**Important**: Optimized for speed and frequent use during development. Does NOT
+include:
 
 - `flutter doctor` (only needed for environment debugging)
-- `flutter pub get` (done automatically by analyze/test)
-- Full Linux build (too slow for frequent checks)
+- `flutter pub get` (done automatically by analyze)
+- Tests (run separately with `flutter test`)
+- Full Linux build (use `just build` for that)
 
 **Usage**:
 
 ```bash
-./ok
+just ok              # Quick checks
+just release-and-install  # Build and install new version
 ```
 
-Must complete in ~10 seconds or less. If it gets slower, investigate and optimize.
+Must complete in ~10 seconds or less. If it gets slower, investigate and
+optimize.
 
 ### API Integration
 
-**Jellyfin Server**: All API interactions use the OpenAPI spec in `ref/jellyfin-openapi-stable.json`
+**Jellyfin Server**: All API interactions use the OpenAPI spec in
+`ref/jellyfin-openapi-stable.json`
 
 **Current Implementation**:
 
@@ -96,39 +127,47 @@ Must complete in ~10 seconds or less. If it gets slower, investigate and optimiz
 
 ### State Management
 
-Currently using basic Flutter `StatefulWidget` patterns. As the app grows, we may need to introduce more sophisticated state management.
+Currently using basic Flutter `StatefulWidget` patterns. As the app grows, we
+may need to introduce more sophisticated state management.
 
 ### Storage
 
 **Configuration (shared_preferences)**:
+
 - `server_url`: Jellyfin server URL (e.g., "http://lab:8096")
 - Stored in user space (~/.local/share on Linux)
 
 **Authentication (flutter_secure_storage)**:
+
 - `access_token`: Jellyfin API access token (encrypted)
 - `user_id`: Current user's ID (encrypted)
 - `user_name`: Current user's name (encrypted)
 - Stored securely using platform-specific keychain/keystore
 - Use `SessionManager` helper class for all auth operations
 
-**Important**: Never use `shared_preferences` for tokens! Always use `SessionManager` for auth data.
+**Important**: Never use `shared_preferences` for tokens! Always use
+`SessionManager` for auth data.
 
 ### Media Key Support
 
 **Linux Integration via MPRIS**:
+
 - Uses `audio_service` with `audio_service_mpris` plugin
 - Integrates with D-Bus MPRIS (Media Player Remote Interfacing Specification)
 - Provides system-wide media controls through desktop environment
 - Works with KDE, GNOME, and other Linux desktop environments
 
 **Implementation**:
+
 - `AudioPlayerService` wraps the audio player with `audio_service`
-- `StingrayAudioHandler` extends `BaseAudioHandler` to handle media control events
+- `StingrayAudioHandler` extends `BaseAudioHandler` to handle media control
+  events
 - Updates media metadata (track, album, artist, artwork) to system
 - Broadcasts playback state (playing/paused, position, duration)
 - Responds to media key events (play, pause, stop)
 
 **Supported Controls**:
+
 - Play/Pause toggle
 - Stop
 - Track metadata display in system media controls
@@ -172,7 +211,7 @@ flutter test path/to/test.dart  # Run specific test
    - User interactions
    - Navigation
    - State changes
-5. Run `./ok` to verify everything passes
+5. Run `just ok` to verify everything passes
 
 ### Adding a New API Call
 
@@ -184,14 +223,15 @@ flutter test path/to/test.dart  # Run specific test
 
 ### Code Style
 
-- Run `dart format .` before committing (or let `ok` script catch it)
+- Run `just fmt` before committing (or let `just ok` catch formatting issues)
 - Follow Flutter/Dart conventions
 - Use `const` constructors where possible
 - Prefer explicit types over `var` for clarity
 
 ## Native Plugin Issues
 
-**Important**: When adding packages with native code (like `shared_preferences`):
+**Important**: When adding packages with native code (like
+`shared_preferences`):
 
 1. Run `flutter clean`
 2. Run `flutter pub get`
@@ -204,7 +244,7 @@ flutter test path/to/test.dart  # Run specific test
 
 Before committing:
 
-1. Run `./ok` - all checks must pass
+1. Run `just ok` - all checks must pass
 2. Ensure tests cover your changes
 3. Write clear, concise commit messages
 4. Focus on "why" rather than "what" in commits
@@ -228,12 +268,14 @@ Things to build (in small chunks!):
 ## Tips for Claude
 
 - **Always work in small chunks** - verify each step before moving forward
-- **Run `./ok` frequently** - catch issues early
+- **Run `just ok` frequently** - catch issues early
 - **Write tests first when appropriate** - TDD helps with design
 - **Reference the Jellyfin API spec** in `ref/` when implementing new features
 - **Focus on Linux first** - don't worry about cross-platform until requested
 - **Keep the UI simple** - functionality over fancy UI for now
 - **Ask questions** - if requirements are unclear, ask before implementing
+- **Use `just` commands** - `just ok`, `just fmt`, `just release-and-install`,
+  etc.
 
 ## Current State
 
@@ -265,6 +307,8 @@ Things to build (in small chunks!):
 ## Notes
 
 - Development server is at `http://lab:8096`
-- All code must pass `./ok` before being considered complete
+- All code must pass `just ok` before being considered complete
 - Tests are mandatory for all new features
 - Work in small, verifiable increments
+- Use `just release-and-install` to build and deploy new versions
+- App installs to `~/.local/share/stingray` with symlink in `~/.local/bin`

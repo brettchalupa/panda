@@ -195,10 +195,7 @@ class JellyfinApi {
   }
 
   // Playback reporting
-  Future<void> reportPlaybackStart(
-    String itemId,
-    int positionTicks,
-  ) async {
+  Future<void> reportPlaybackStart(String itemId, int positionTicks) async {
     if (accessToken == null || userId == null) {
       throw Exception('Not authenticated');
     }
@@ -219,7 +216,9 @@ class JellyfinApi {
     );
 
     if (response.statusCode != 204 && response.statusCode != 200) {
-      throw Exception('Failed to report playback start: ${response.statusCode}');
+      throw Exception(
+        'Failed to report playback start: ${response.statusCode}',
+      );
     }
   }
 
@@ -254,10 +253,7 @@ class JellyfinApi {
     }
   }
 
-  Future<void> reportPlaybackStopped(
-    String itemId,
-    int positionTicks,
-  ) async {
+  Future<void> reportPlaybackStopped(String itemId, int positionTicks) async {
     if (accessToken == null || userId == null) {
       throw Exception('Not authenticated');
     }
