@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'jellyfin_api.dart';
 import 'session_manager.dart';
 import 'library_selection_screen.dart';
@@ -17,6 +18,8 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   String? _libraryName;
   String? _userName;
   String? _serverUrl;
+  String? _version;
+  String? _buildNumber;
 
   @override
   void initState() {
@@ -26,10 +29,14 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final packageInfo = await PackageInfo.fromPlatform();
+
     setState(() {
       _libraryName = prefs.getString('last_library_name');
       _serverUrl = prefs.getString('server_url');
       _userName = widget.api.userName;
+      _version = packageInfo.version;
+      _buildNumber = packageInfo.buildNumber;
     });
   }
 
@@ -123,6 +130,21 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
             leading: const Icon(Icons.person),
             title: const Text('Username'),
             subtitle: Text(_userName ?? 'Unknown'),
+          ),
+          const Divider(),
+
+          // App Info Section
+          ListTile(
+            title: Text('App', style: Theme.of(context).textTheme.titleSmall),
+          ),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text('Version'),
+            subtitle: Text(
+              _version != null && _buildNumber != null
+                  ? '$_version+$_buildNumber'
+                  : 'Loading...',
+            ),
           ),
           const Divider(),
 

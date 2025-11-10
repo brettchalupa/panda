@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Release packages
+stingray-*-linux-x64/
+stingray-*-linux-x64.tar.gz
+
+# Release packages
+build/release/

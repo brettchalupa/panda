@@ -20,7 +20,7 @@ interface.
 
 ## Screenshots
 
-_(Coming soon)_
+![Screenhot of Stingray v0.1, showing the album list view](https://assets.brettchalupa.com/uploads/stingray-0.1.0.webp)
 
 ## Installation
 
@@ -173,13 +173,17 @@ stingray/
 
 ## Platform Support
 
+**Current Focus: Linux Desktop**
+
+Stingray is being developed primarily for Linux desktop environments. Once it's stable and feature-complete on Linux, we'll expand to other platforms.
+
 | Platform | Status       |
 | -------- | ------------ |
 | Linux    | ✅ Supported |
 | macOS    | 🚧 Planned   |
 | Windows  | 🚧 Planned   |
 
-Possibly Android and iOS releases to come. We'll see.
+Mobile support (Android/iOS) may come later.
 
 ## Requirements
 
@@ -196,6 +200,50 @@ This is free and unencumbered software released into the public domain.
 - Inspired by [Plexamp](https://plexamp.com/)
 - Built with [Flutter](https://flutter.dev/)
 - Powered by [Jellyfin](https://jellyfin.org/)
+
+## Releasing
+
+### Version Numbering
+
+Stingray uses [Semantic Versioning](https://semver.org/):
+
+- Version format: `MAJOR.MINOR.PATCH+BUILD`
+- Example: `0.1.0+1`
+  - `0.1.0` - The version (major.minor.patch)
+  - `+1` - The build number (increments with each build, helps track specific builds)
+
+The **build number** is an incremental counter that helps distinguish between different builds of the same version. It's useful during development when you might rebuild the same version multiple times while testing. For releases, increment the version number and reset the build number to 1.
+
+### Creating a Release
+
+1. Update version in `pubspec.yaml`:
+
+   ```yaml
+   version: 0.2.0+1
+   ```
+
+2. Update `CHANGELOG.md` with changes for this version
+
+3. Create the release package:
+
+   ```bash
+   just package
+   ```
+
+4. The tarball will be created in `build/release/stingray-VERSION-linux-x64.tar.gz`
+
+5. Test the package:
+
+   ```bash
+   cd build/release
+   tar -xzf stingray-VERSION-linux-x64.tar.gz
+   cd stingray-VERSION-linux-x64
+   ./install.sh
+   ```
+
+6. Create a GitHub release and upload the tarball
+
+See `CHANGELOG.md` for release history.
 
 ## Support
 

@@ -119,6 +119,10 @@ doctor:
 version:
     @grep "version:" pubspec.yaml
 
+# Create a release tarball
+package:
+    ./scripts/package.sh
+
 # Launch the installed app
 launch:
     stingray &
