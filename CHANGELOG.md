@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+- Dark Mode theme with setting and auto switching
+
 ## [0.1.0] - 2025-11-10
 
 ### Added
