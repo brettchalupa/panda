@@ -2,7 +2,7 @@ name: panda
 description: "Desktop music player for Jellyfin"
 publish_to: "none"
 
-version: 0.2.0+1
+version: 0.3.0-dev+1
 
 environment:
   sdk: ^3.9.2
