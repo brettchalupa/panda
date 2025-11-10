@@ -29,7 +29,7 @@ class AudioPlayerService extends ChangeNotifier {
   final List<QueueItem> _queue = [];
   int _currentQueueIndex = -1;
   JellyfinApi? _api;
-  DateTime? _lastProgressReport;
+  DateTime? _lastPositionUpdate;
 
   Track? get currentTrack => _currentTrack;
   Album? get currentAlbum => _currentAlbum;
@@ -74,24 +74,19 @@ class AudioPlayerService extends ChangeNotifier {
     return duration.inMicroseconds * 10; // 1 tick = 100 nanoseconds
   }
 
-  void _reportProgressIfNeeded() {
+  void _reportPlaybackStopped() {
     if (_api == null || _currentTrack == null) return;
 
-    final now = DateTime.now();
-    // Report progress every 10 seconds
-    if (_lastProgressReport == null ||
-        now.difference(_lastProgressReport!) > const Duration(seconds: 10)) {
-      _lastProgressReport = now;
-      final positionTicks = _durationToTicks(_position);
-      _api!
-          .reportPlaybackProgress(_currentTrack!.id, positionTicks, !_isPlaying)
-          .catchError((e) {
-            // Silently fail - don't interrupt playback
-            if (kDebugMode) {
-              print('Failed to report playback progress: $e');
-            }
-          });
-    }
+    // Report final position when stopping/completing
+    final positionTicks = _durationToTicks(_position);
+    _api!.reportPlaybackStopped(_currentTrack!.id, positionTicks).catchError((
+      e,
+    ) {
+      // Silently fail
+      if (kDebugMode) {
+        print('Failed to report playback stopped: $e');
+      }
+    });
   }
 
   AudioPlayerService({bool initializeAudioService = true}) {
@@ -107,9 +102,16 @@ class AudioPlayerService extends ChangeNotifier {
 
     _audioPlayer.onPositionChanged.listen((position) {
       _position = position;
-      _updatePlaybackState();
-      _reportProgressIfNeeded();
-      notifyListeners();
+
+      // Throttle updates to reduce CPU usage
+      // Only update UI/MPRIS every 1 second (sufficient for progress bar)
+      final now = DateTime.now();
+      if (_lastPositionUpdate == null ||
+          now.difference(_lastPositionUpdate!) > const Duration(seconds: 1)) {
+        _lastPositionUpdate = now;
+        _updatePlaybackState();
+        notifyListeners();
+      }
     });
 
     _audioPlayer.onDurationChanged.listen((duration) {
@@ -118,6 +120,9 @@ class AudioPlayerService extends ChangeNotifier {
     });
 
     _audioPlayer.onPlayerComplete.listen((_) {
+      // Report playback completion to Jellyfin
+      _reportPlaybackStopped();
+
       // Auto-play next track when current track finishes
       if (hasNext) {
         playNext();
@@ -192,7 +197,6 @@ class AudioPlayerService extends ChangeNotifier {
     _currentTrack = track;
     _currentAlbum = album;
     _albumArtUrl = albumArtUrl;
-    _lastProgressReport = null;
 
     // Report playback start
     if (_api != null) {
@@ -297,7 +301,6 @@ class AudioPlayerService extends ChangeNotifier {
     await _audioPlayer.stop();
     _currentTrack = null;
     _currentAlbum = null;
-    _lastProgressReport = null;
     _updatePlaybackState();
     notifyListeners();
   }
