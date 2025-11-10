@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stingray/login_screen.dart';
+import 'package:panda/login_screen.dart';
 
 void main() {
   testWidgets('Login screen displays correctly', (WidgetTester tester) async {

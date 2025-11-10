@@ -1,4 +1,4 @@
-# Stingray - Jellyfin Music Player
+# Panda - Jellyfin Music Player
 # Just commands for development and deployment
 
 # Default recipe - show available commands
@@ -38,37 +38,37 @@ build:
 
 # Build and create optimized release
 release: clean build
-    @echo "✓ Release build complete: build/linux/x64/release/bundle/stingray"
+    @echo "✓ Release build complete: build/linux/x64/release/bundle/panda"
 
 # Install the app locally to ~/.local
 install:
     #!/usr/bin/env bash
     set -euo pipefail
-    echo "Installing Stingray to ~/.local/share/stingray..."
-    rm -rf ~/.local/share/stingray
+    echo "Installing Panda to ~/.local/share/panda..."
+    rm -rf ~/.local/share/panda
     mkdir -p ~/.local/share
-    cp -r build/linux/x64/release/bundle ~/.local/share/stingray
-    chmod +x ~/.local/share/stingray/stingray
+    cp -r build/linux/x64/release/bundle ~/.local/share/panda
+    chmod +x ~/.local/share/panda/panda
 
     echo "Creating symlink in ~/.local/bin..."
     mkdir -p ~/.local/bin
-    ln -sf ~/.local/share/stingray/stingray ~/.local/bin/stingray
+    ln -sf ~/.local/share/panda/panda ~/.local/bin/panda
 
     echo "Creating desktop entry..."
     mkdir -p ~/.local/share/applications
-    cat > ~/.local/share/applications/com.brettchalupa.stingray.desktop << 'EOF'
+    cat > ~/.local/share/applications/com.brettchalupa.panda.desktop << 'EOF'
     [Desktop Entry]
-    Name=Stingray
+    Name=Panda
     Comment=Jellyfin Music Player
-    Exec=stingray
+    Exec=panda
     Terminal=false
     Type=Application
     Categories=AudioVideo;Audio;Player;
     StartupNotify=true
-    StartupWMClass=com.brettchalupa.stingray
+    StartupWMClass=com.brettchalupa.panda
     EOF
 
-    chmod +x ~/.local/share/applications/com.brettchalupa.stingray.desktop
+    chmod +x ~/.local/share/applications/com.brettchalupa.panda.desktop
 
     # Update desktop database if available
     if command -v update-desktop-database &> /dev/null; then
@@ -76,8 +76,8 @@ install:
     fi
 
     echo "✓ Installation complete!"
-    echo "  Launch with: stingray"
-    echo "  Or search for 'Stingray' in your application menu"
+    echo "  Launch with: panda"
+    echo "  Or search for 'Panda' in your application menu"
     echo ""
     echo "Note: Make sure ~/.local/bin is in your PATH"
 
@@ -85,10 +85,10 @@ install:
 uninstall:
     #!/usr/bin/env bash
     set -euo pipefail
-    echo "Uninstalling Stingray..."
-    rm -rf ~/.local/share/stingray
-    rm -f ~/.local/bin/stingray
-    rm -f ~/.local/share/applications/com.brettchalupa.stingray.desktop
+    echo "Uninstalling Panda..."
+    rm -rf ~/.local/share/panda
+    rm -f ~/.local/bin/panda
+    rm -f ~/.local/share/applications/com.brettchalupa.panda.desktop
 
     if command -v update-desktop-database &> /dev/null; then
         update-desktop-database ~/.local/share/applications
@@ -99,8 +99,8 @@ uninstall:
 # Build, install, and launch
 release-and-install: release install
     @echo "✓ Build and install complete!"
-    @echo "Launching Stingray..."
-    stingray &
+    @echo "Launching Panda..."
+    panda &
 
 # Clean build artifacts
 clean:
@@ -129,8 +129,8 @@ package:
 
 # Launch the installed app
 launch:
-    stingray &
+    panda &
 
 # View logs (if running)
 logs:
-    journalctl --user -f | grep -i stingray
+    journalctl --user -f | grep -i panda

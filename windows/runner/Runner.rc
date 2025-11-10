@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "stingray" "\0"
+            VALUE "FileDescription", "panda" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "stingray" "\0"
+            VALUE "InternalName", "panda" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "stingray.exe" "\0"
-            VALUE "ProductName", "stingray" "\0"
+            VALUE "OriginalFilename", "panda.exe" "\0"
+            VALUE "ProductName", "panda" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

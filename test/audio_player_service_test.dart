@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stingray/audio_player_service.dart';
-import 'package:stingray/jellyfin_api.dart';
+import 'package:panda/audio_player_service.dart';
+import 'package:panda/jellyfin_api.dart';
 
 void main() {
   // Note: AudioPlayerService testing requires mocking audioplayers and audio_service

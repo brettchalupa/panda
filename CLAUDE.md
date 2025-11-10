@@ -1,8 +1,8 @@
-# Stingray - Development Guide for Claude
+# Panda - Development Guide for Claude
 
 ## Project Overview
 
-Stingray is a native music player for Jellyfin, inspired by Plexamp. The goal is
+Panda is a native music player for Jellyfin, inspired by Plexamp. The goal is
 to create a high-quality desktop music player with native media key support and
 seamless integration with Jellyfin music libraries.
 
@@ -39,7 +39,7 @@ smallest possible increments that can be tested and verified independently.
 ## Project Structure
 
 ```
-stingray/
+panda/
 ├── lib/
 │   ├── main.dart              # Main app entry point and home screen
 │   └── settings_screen.dart   # Server configuration screen
@@ -83,7 +83,7 @@ stingray/
 - `just run` - Run the app in development mode
 - `just build` - Build release version for Linux
 - `just release` - Clean and build optimized release
-- `just install` - Install app to `~/.local/share/stingray`
+- `just install` - Install app to `~/.local/share/panda`
 - `just release-and-install` - Build, install, and launch
 - `just launch` - Launch the installed app
 - `just uninstall` - Remove the installed app
@@ -158,7 +158,7 @@ may need to introduce more sophisticated state management.
 **Implementation**:
 
 - `AudioPlayerService` wraps the audio player with `audio_service`
-- `StingrayAudioHandler` extends `BaseAudioHandler` to handle media control
+- `PandaAudioHandler` extends `BaseAudioHandler` to handle media control
   events
 - Updates media metadata (track, album, artist, artwork) to system
 - Broadcasts playback state (playing/paused, position, duration)
@@ -339,4 +339,4 @@ Things to build (in small chunks!):
 - Tests are mandatory for all new features
 - Work in small, verifiable increments
 - Use `just release-and-install` to build and deploy new versions
-- App installs to `~/.local/share/stingray` with symlink in `~/.local/bin`
+- App installs to `~/.local/share/panda` with symlink in `~/.local/bin`

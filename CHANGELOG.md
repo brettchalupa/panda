@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Stingray will be documented in this file.
+All notable changes to Panda will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
@@ -8,13 +8,20 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- GitHub Workflow for CI checks
 - Dark Mode theme with setting and auto switching
+
+### Changed
+
+- Project renamed from Stingray to Panda to avoid possible conflict with existing Stingray music service
 
 ## [0.1.0] - 2025-11-10
 
 ### Added
 
-- Initial release of Stingray
+- Initial release of Panda (formerly Stingray)
 - Jellyfin server connection and authentication
 - Secure token storage with session persistence
 - Music library browsing with album grid view

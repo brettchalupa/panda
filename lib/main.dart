@@ -39,12 +39,12 @@ class MyApp extends StatelessWidget {
       builder: (context, themeManager, child) {
         final audioPlayerService = Provider.of<AudioPlayerService>(context);
         return MaterialApp(
-          title: 'Stingray',
+          title: 'Panda',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeManager.themeMode,
           home: MyHomePage(
-            title: 'Stingray',
+            title: 'Panda',
             audioPlayerService: audioPlayerService,
           ),
         );

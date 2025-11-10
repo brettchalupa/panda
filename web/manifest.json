@@ -1,11 +1,11 @@
 {
-    "name": "stingray",
-    "short_name": "stingray",
+    "name": "panda",
+    "short_name": "panda",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Jellyfin Music Player",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

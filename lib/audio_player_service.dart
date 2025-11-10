@@ -128,10 +128,10 @@ class AudioPlayerService extends ChangeNotifier {
   Future<void> _init() async {
     try {
       _audioHandler = await AudioService.init(
-        builder: () => StingrayAudioHandler(this),
+        builder: () => PandaAudioHandler(this),
         config: const AudioServiceConfig(
-          androidNotificationChannelId: 'com.stingray.audio',
-          androidNotificationChannelName: 'Stingray',
+          androidNotificationChannelId: 'com.panda.audio',
+          androidNotificationChannelName: 'Panda',
           androidNotificationOngoing: true,
         ),
       );
@@ -144,8 +144,8 @@ class AudioPlayerService extends ChangeNotifier {
   }
 
   void _updatePlaybackState() {
-    if (_audioHandler is StingrayAudioHandler) {
-      (_audioHandler as StingrayAudioHandler).updatePlaybackState(
+    if (_audioHandler is PandaAudioHandler) {
+      (_audioHandler as PandaAudioHandler).updatePlaybackState(
         playing: _isPlaying,
         position: _position,
         hasNext: hasNext,
@@ -157,8 +157,8 @@ class AudioPlayerService extends ChangeNotifier {
   void _updateMediaItem() {
     if (_currentTrack != null &&
         _currentAlbum != null &&
-        _audioHandler is StingrayAudioHandler) {
-      (_audioHandler as StingrayAudioHandler).setMediaItem(
+        _audioHandler is PandaAudioHandler) {
+      (_audioHandler as PandaAudioHandler).setMediaItem(
         id: _currentTrack!.id,
         title: _currentTrack!.name,
         album: _currentAlbum!.name,
@@ -310,10 +310,10 @@ class AudioPlayerService extends ChangeNotifier {
 }
 
 /// Audio handler for integrating with system media controls
-class StingrayAudioHandler extends BaseAudioHandler {
+class PandaAudioHandler extends BaseAudioHandler {
   final AudioPlayerService _service;
 
-  StingrayAudioHandler(this._service);
+  PandaAudioHandler(this._service);
 
   void updatePlaybackState({
     required bool playing,

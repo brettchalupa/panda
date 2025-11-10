@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Centralized theme configuration for Stingray.
+/// Centralized theme configuration for Panda.
 ///
 /// This file makes it easy to customize the app's appearance by providing
 /// both light and dark themes with consistent styling across all screens.
