@@ -25,7 +25,11 @@ interface.
 
 ## Installation
 
-### Prerequisites
+[Download the latest version of the app.](https://github.com/brettchalupa/panda/releases/latest)
+
+### Install from Source
+
+#### Prerequisites
 
 **System Dependencies (Linux)**:
 
@@ -57,7 +61,7 @@ sudo dnf install just  # Fedora
 sudo apt install just  # Ubuntu/Debian
 ```
 
-### Building from Source
+#### Building from Source
 
 1. **Clone the repository**:
 
@@ -80,7 +84,7 @@ sudo apt install just  # Ubuntu/Debian
 The app will be installed to `~/.local/share/panda` with a launcher in your
 application menu.
 
-### Running from Source
+#### Running from Source
 
 For development:
 
