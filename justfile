@@ -21,8 +21,12 @@ fmt-check:
 analyze:
     flutter analyze
 
-# Run all checks (format check + analyze)
-check: fmt-check analyze
+# Run tests
+test:
+    flutter test
+
+# Run all checks (format check + analyze + tests)
+check: fmt-check analyze test
     @echo "✓ All checks passed!"
 
 # Alias for check

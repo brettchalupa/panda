@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 import 'package:stingray/main.dart';
+import 'package:stingray/audio_player_service.dart';
+import 'package:stingray/theme_manager.dart';
 
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
   });
+
+  Widget createTestApp() {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeManager()),
+        ChangeNotifierProvider(
+          create: (_) => AudioPlayerService(initializeAudioService: false),
+        ),
+      ],
+      child: const MyApp(),
+    );
+  }
 
   testWidgets('Main screen shows sign in when server configured', (
     WidgetTester tester,
@@ -16,7 +31,7 @@ void main() {
       'server_url': 'http://test-server:8096',
     });
 
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(createTestApp());
     await tester.pumpAndSettle();
 
     // Verify that the title is present.
@@ -41,7 +56,7 @@ void main() {
     // Start with no server configured
     SharedPreferences.setMockInitialValues({});
 
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(createTestApp());
     await tester.pump();
 
     // Should show the status initially
@@ -55,7 +70,7 @@ void main() {
       'server_url': 'http://test-server:8096',
     });
 
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(createTestApp());
     await tester.pumpAndSettle();
 
     // Tap settings button

@@ -94,8 +94,10 @@ class AudioPlayerService extends ChangeNotifier {
     }
   }
 
-  AudioPlayerService() {
-    _init();
+  AudioPlayerService({bool initializeAudioService = true}) {
+    if (initializeAudioService) {
+      _init();
+    }
 
     _audioPlayer.onPlayerStateChanged.listen((state) {
       _isPlaying = state == PlayerState.playing;
@@ -124,14 +126,21 @@ class AudioPlayerService extends ChangeNotifier {
   }
 
   Future<void> _init() async {
-    _audioHandler = await AudioService.init(
-      builder: () => StingrayAudioHandler(this),
-      config: const AudioServiceConfig(
-        androidNotificationChannelId: 'com.stingray.audio',
-        androidNotificationChannelName: 'Stingray',
-        androidNotificationOngoing: true,
-      ),
-    );
+    try {
+      _audioHandler = await AudioService.init(
+        builder: () => StingrayAudioHandler(this),
+        config: const AudioServiceConfig(
+          androidNotificationChannelId: 'com.stingray.audio',
+          androidNotificationChannelName: 'Stingray',
+          androidNotificationOngoing: true,
+        ),
+      );
+    } catch (e) {
+      // Silently fail if audio service is already initialized (e.g., in tests)
+      if (kDebugMode) {
+        print('Failed to initialize audio service: $e');
+      }
+    }
   }
 
   void _updatePlaybackState() {
