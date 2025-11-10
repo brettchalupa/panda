@@ -10,6 +10,7 @@ and this project adheres to
 
 ### Added
 
+- App icon by Sofie Ascherl from [OpenMoji](https://openmoji.org/library/emoji-1F43C/), licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 - GitHub Workflow for CI checks
 - Dark Mode theme with setting and auto switching
 

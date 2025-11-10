@@ -223,6 +223,13 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                   : 'Loading...',
             ),
           ),
+          ListTile(
+            leading: const Icon(Icons.attribution),
+            title: const Text('Icon'),
+            subtitle: const Text(
+              'Panda icon by Sofie Ascherl (OpenMoji, CC BY-SA 4.0)',
+            ),
+          ),
           const Divider(),
 
           // Actions
