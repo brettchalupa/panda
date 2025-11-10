@@ -20,7 +20,7 @@ interface.
 
 ## Screenshots
 
-![Screenshot of Panda v0.1, showing the album list view](https://assets.brettchalupa.com/uploads/stingray-0.1.0.webp)
+![Screenshot of Panda v0.2 dev, showing the album list view](https://assets.brettchalupa.com/uploads/panda-0.2.0-dev-2.webp)
 
 ## Installation
 
@@ -200,6 +200,7 @@ This is free and unencumbered software released into the public domain.
 - Inspired by [Plexamp](https://plexamp.com/)
 - Built with [Flutter](https://flutter.dev/)
 - Powered by [Jellyfin](https://jellyfin.org/)
+- Panda icon by Sofie Ascherl from [OpenMoji](https://openmoji.org/library/emoji-1F43C/), licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 ## Releasing
 

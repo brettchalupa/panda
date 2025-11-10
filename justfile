@@ -42,44 +42,7 @@ release: clean build
 
 # Install the app locally to ~/.local
 install:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    echo "Installing Panda to ~/.local/share/panda..."
-    rm -rf ~/.local/share/panda
-    mkdir -p ~/.local/share
-    cp -r build/linux/x64/release/bundle ~/.local/share/panda
-    chmod +x ~/.local/share/panda/panda
-
-    echo "Creating symlink in ~/.local/bin..."
-    mkdir -p ~/.local/bin
-    ln -sf ~/.local/share/panda/panda ~/.local/bin/panda
-
-    echo "Creating desktop entry..."
-    mkdir -p ~/.local/share/applications
-    cat > ~/.local/share/applications/com.brettchalupa.panda.desktop << 'EOF'
-    [Desktop Entry]
-    Name=Panda
-    Comment=Jellyfin Music Player
-    Exec=panda
-    Terminal=false
-    Type=Application
-    Categories=AudioVideo;Audio;Player;
-    StartupNotify=true
-    StartupWMClass=com.brettchalupa.panda
-    EOF
-
-    chmod +x ~/.local/share/applications/com.brettchalupa.panda.desktop
-
-    # Update desktop database if available
-    if command -v update-desktop-database &> /dev/null; then
-        update-desktop-database ~/.local/share/applications
-    fi
-
-    echo "✓ Installation complete!"
-    echo "  Launch with: panda"
-    echo "  Or search for 'Panda' in your application menu"
-    echo ""
-    echo "Note: Make sure ~/.local/bin is in your PATH"
+    ./scripts/install.sh
 
 # Uninstall the app
 uninstall:
