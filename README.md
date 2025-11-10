@@ -1,4 +1,4 @@
-# Panda
+# Panda 🐼
 
 A native desktop music player for Jellyfin, built with Flutter. Inspired by
 Plexamp, Panda provides a high-quality music listening experience with
@@ -17,6 +17,7 @@ interface.
 - **Persistent Now Playing Bar**: Seamless playback across navigation
 - **Album Art Display**: High-quality artwork with optimized loading
 - **Queue Management**: Navigate through your current playlist
+- **Dark and Light Mode**: Selectable or auto theme setting
 
 ## Screenshots
 
